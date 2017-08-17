@@ -227,7 +227,9 @@ void deleteNode(ListNode *node) {
 
 // 合并两个有序链表
 ListNode *mergeTwoSortedList(ListNode *list1, ListNode *list2) {
-    if (list1 == nullptr && list2 == nullptr) return nullptr;
+    if (list1 == nullptr) return list2;
+    if (list2 == nullptr) return list1;
+
     ListNode dummy(-1);
     ListNode *p = &dummy;
     ListNode *p1 = list1, *p2 = list2;
@@ -243,17 +245,9 @@ ListNode *mergeTwoSortedList(ListNode *list1, ListNode *list2) {
         p = p->next;
     }
 
-    while (p1 != nullptr) {
-        p->next = p1;
-        p1 = p1->next;
-        p = p->next;
-    }
+    if (p1 != nullptr)  p->next = p1;   //不用再跟踪p和p1了，直接链接过来就可以了
+    if (p2 != nullptr)  p->next = p2;
 
-    while (p2 != nullptr) {
-        p->next = p2;
-        p2 = p2->next;
-        p = p->next;
-    }
     return dummy.next;
 }
 
@@ -359,9 +353,22 @@ ListNode *partitionList(ListNode *head, int x) {
 }
 
 
+// 求链表的中间节点.如果有偶数个节点，返回中间两个节点的第二个;如果有奇数个节点，返回唯一一个
+ListNode *getListMid(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return head;
+
+    ListNode *pSlow, *pFast;
+    pSlow = pFast = head;
+
+    while (pFast && pFast->next) { //如果要返回中间结点的第一个节点: while (pFast && pFast->next->next)
+        pSlow = pSlow->next;
+        pFast = pFast->next->next;
+    }
+    return pSlow;
+}
 
 int main(){
-    int valArray1[] = {20, 7, 2, 5, 1, 9, 10, 6, 100, 34};
+    int valArray1[] = {20, 7, 2, 5, 1, 9, 10, 6, 100};
     int valArray1Len = sizeof(valArray1)/sizeof(valArray1[0]);
     ListNode *list1 = initLinkedList(valArray1, valArray1Len);
 
@@ -373,6 +380,10 @@ int main(){
     iterateLinkedList(list1);
     cout << endl << "List 2:" << endl;
     iterateLinkedList(list2);
+
+    //寻找中间节点
+    ListNode *mid = getListMid(list1);
+    cout << endl << "Middle node of list1: " << mid->val << endl;
 
     // 删除某个节点
     //deleteNode(list1->next);
