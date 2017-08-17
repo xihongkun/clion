@@ -5,6 +5,11 @@
 #include <iostream>
 
 using namespace std;
+static void swap(int &a, int &b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
 
 struct ListNode {
     int val;
@@ -220,6 +225,141 @@ void deleteNode(ListNode *node) {
 }
 
 
+// 合并两个有序链表
+ListNode *mergeTwoSortedList(ListNode *list1, ListNode *list2) {
+    if (list1 == nullptr && list2 == nullptr) return nullptr;
+    ListNode dummy(-1);
+    ListNode *p = &dummy;
+    ListNode *p1 = list1, *p2 = list2;
+
+    while (p1 != nullptr && p2 != nullptr) {
+        if (p1->val < p2->val) {
+            p->next = p1;
+            p1 = p1->next;
+        } else {
+            p->next = p2;
+            p2 = p2->next;
+        }
+        p = p->next;
+    }
+
+    while (p1 != nullptr) {
+        p->next = p1;
+        p1 = p1->next;
+        p = p->next;
+    }
+
+    while (p2 != nullptr) {
+        p->next = p2;
+        p2 = p2->next;
+        p = p->next;
+    }
+    return dummy.next;
+}
+
+//-----------------------------链表的快速排序 -------------------------------------------------------//
+// 链表快速排序 分区
+ListNode *quickSortListPartition(ListNode *start, ListNode *end) {
+    int pivot = start->val;
+
+    ListNode *p = start;  //用来遍历链表的指针
+    ListNode *index = start; //
+
+    while(p != nullptr) {
+        //如果遍历到的值小于pivot, index往前走，然后index/p交换数值
+        if (p->val < pivot) {
+            index = index->next;
+            swap(p->val, index->val);
+        }
+        p = p->next;
+    }
+    //最后 将index/start的值交换.这样, index左侧链表的值都小于pivot
+    if (index != start) {
+        swap(index->val, start->val);
+    }
+    return index;
+}
+
+// 递归函数
+void quickSortList(ListNode *start, ListNode *end) {
+    if (start != end && start->next != end) {   //前闭后开区间
+        ListNode *index = quickSortListPartition(start, end);
+        quickSortList(start, index);  //前闭后开区间
+        quickSortList(index->next, end);
+    }
+}
+
+//快速排序的主函数
+void quickSortListMain(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return;
+    quickSortList(head, nullptr);
+}
+
+// End -----------------------------链表的快速排序 -------------------------------------------------------//
+
+/**
+ * [LeetCode]91. Rotate List旋转链表
+ * Given a list, rotate the list to the right by k places, where k is non-negative.
+ * For example: Given 1->2->3->4->5->NULL and k = 2, return 4->5->1->2->3->NULL.
+ * Idea:
+ * @return head pointer of the new list
+ */
+ListNode *rotateList(ListNode *head, int k) {
+    if (head == nullptr || head->next == nullptr || k == 0) return head;
+    ListNode *p = head;
+    //求链表长度
+    int len = 1;
+    while (p->next) {
+        len++;
+        p = p->next;
+    }
+
+    // p指向尾节点。将他与头节点连起来，形成一个环。
+    p->next = head;
+
+    //从尾节点开始，向前走len-k步，找到需要断开的节点
+    for (int i = 1; i <= len - k; i++) {
+        p = p->next;
+    }
+
+    head = p->next;
+    p->next = nullptr;
+    return head;
+}
+
+/** [LeetCode]89. Partition List链表划分
+ * Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
+ * You should preserve the original relative order of the nodes in each of the two partitions.
+ * For example, Given 1->4->3->2->5->2 and x = 3, return 1->2->2->4->3->5.
+ * 思路： 遍历一遍链表，分别将值小于x和值大于等于x的节点分为两个链表链接起来，然后再将后者链接在前者的末尾就可以了。
+*/
+ListNode *partitionList(ListNode *head, int x) {
+    if (head == nullptr || head->next == nullptr) return head;
+    ListNode *p = head;
+
+    ListNode leftDummy(-1);
+    ListNode rightDummy(-1);
+
+    ListNode *leftpCur = &leftDummy;
+    ListNode *rightpCur = &rightDummy;
+
+    while (p != nullptr) {
+        if (p->val < x) {
+            leftpCur->next = p;
+            leftpCur = leftpCur->next;
+        } else {
+            rightpCur->next = p;
+            rightpCur = rightpCur->next;
+        }
+        p = p->next;
+    }
+    leftpCur->next = rightDummy.next;
+    rightpCur->next = nullptr;  //不要忘记设置右子链表的尾节点!!!
+    return leftDummy.next;
+}
+
+
+
 int main(){
     int valArray1[] = {20, 7, 2, 5, 1, 9, 10, 6, 100, 34};
     int valArray1Len = sizeof(valArray1)/sizeof(valArray1[0]);
@@ -268,4 +408,42 @@ int main(){
     ListNode *removeNthfromEnd2Oflist = removeNthFromEnd2(removeNthfromEndOflist, 4);
     cout << endl << "Remove 4th from end of list2Reverse: " << endl;
     iterateLinkedList(removeNthfromEnd2Oflist);
+
+    // rotate list
+    int valArray3[] = {2, 8, 1, 5, 12, 0, 23, 4, 6, 13};
+    int valArray3Len = sizeof(valArray3)/sizeof(valArray3[0]);
+    ListNode *list3 = initLinkedList(valArray3, valArray3Len);
+    cout << endl << "List 3:" << endl;
+    iterateLinkedList(list3);
+
+    ListNode *rotatedList = rotateList(list3, 4);
+    cout << endl << "Rotate list3 from end index 4: " << endl;
+    iterateLinkedList(rotatedList);
+
+    // 将链表分区
+    ListNode *partitedList = partitionList(rotatedList, 8);
+    cout << endl << "Partition list compared with 8: " << endl;
+    iterateLinkedList(partitedList);
+
+    // 将链表快速排序
+    int valArray4[] = {2, 8, 1, 5, 12, 0, 23, 4, 6, 13};
+    int valArray4Len = sizeof(valArray4)/sizeof(valArray4[0]);
+    ListNode *list4 = initLinkedList(valArray4, valArray4Len);
+
+    int valArray5[] = {20, 7, 2, 5, 1, 9, 10, 6, 100, 34};
+    int valArray5Len = sizeof(valArray5)/sizeof(valArray5[0]);
+    ListNode *list5 = initLinkedList(valArray5, valArray5Len);
+
+    // 合并两个有序链表
+    quickSortListMain(list4);
+    quickSortListMain(list5);
+
+    cout << endl << "Now quick sort list 4: " << endl;
+    iterateLinkedList(list4);
+    cout << endl << "Now quick sort list 5: " << endl;
+    iterateLinkedList(list5);
+
+    ListNode *mergedList = mergeTwoSortedList(list4, list5);
+    cout << endl << "Merge list4 and list 5: " << endl;
+    iterateLinkedList(mergedList);
 }
