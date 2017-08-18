@@ -330,6 +330,44 @@ void quickSortListMain(ListNode *head) {
 
 // End -----------------------------链表的快速排序 -------------------------------------------------------//
 
+// -----------------------链表的insert sort--------------------------------------------------------------//
+
+// 在排好序的链表里寻找插入位置
+ListNode *getInsertPos(ListNode *dummyHead, int x) {
+    ListNode *pcur = dummyHead->next;
+    ListNode *pre = dummyHead;
+
+    while (pcur && pcur->val <= x) {
+        pre = pcur;
+        pcur = pcur->next;
+    }
+    return pre;
+}
+
+ListNode *insertSortList(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return head;
+    // 这里不要设置dummy.next=head。dummy链表是已经排好序的链表。
+    // 由于往dummy链表插入的时候，对于第一个插入的元素，一定会执行pcur->next = &dummy->next(nullptr), 这样就把pcur与后面原链表的节点断开了。
+    // 因此，执行上面的getInsertPos函数 总是会在排好序的链表里寻找插入位置。
+    ListNode dummy(INT8_MIN);
+    ListNode *pcur = head;
+    while (pcur) {
+        ListNode *pos = getInsertPos(&dummy, pcur->val);
+
+        //把pcur插入到pos之后。在这之前，需要先保存pcur的下一个节点
+        ListNode *temp = pcur->next;
+
+        pcur->next = pos->next;
+        pos->next = pcur;
+
+        pcur = temp;
+    }
+    return dummy.next;
+}
+
+// -----------------------  End  链表的insert sort--------------------------------------------------------------//
+
+
 /**
  * [LeetCode]91. Rotate List旋转链表
  * Given a list, rotate the list to the right by k places, where k is non-negative.
@@ -506,4 +544,8 @@ int main(){
     ListNode *swappedList = swapPairs(mergedList);
     cout << endl << "Swap node in pairs for merged list: " << endl;
     iterateLinkedList(swappedList);
+
+    ListNode *insertSortedList = insertSortList(swappedList);
+    cout << endl << "Now re-sort the list using insertion sort: " << endl;
+    iterateLinkedList(insertSortedList);
 }
