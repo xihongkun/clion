@@ -66,12 +66,7 @@ ListNode* reverseList(ListNode *head) {
  * For example:
  * Given 1->2->3->4->5->NULL, m = 2 and n = 4, return 1->4->3->2->5->NULL.
  * Note: Given m, n satisfy the following condition: 1 ≤ m ≤ n ≤ length of list.
- * @param head
- * @param m
- * @param n
- * @return
  */
-
 ListNode* reverseBetween(ListNode* head, int m, int n) {
     if (head == nullptr || head->next == nullptr ||  m == n ) return head;
     ListNode dummy(-1);
@@ -155,9 +150,6 @@ ListNode* addTwoList(ListNode *list1, ListNode *list2) {
  * Given a linked list, remove the nth node from the end of list and return its head. For example,
  * Given linked list: 1->2->3->4->5, and n = 2. After removing the second node from the end, the linked list becomes 1->2->3->5.
  * Note: Given n will always be valid. Try to do this in one pass.
- * @param head
- * @param n
- * @return head pointer of linked list
  */
 
 // 方法1： 先求链表的长度，然后找到要删除的节点
@@ -215,13 +207,59 @@ ListNode *removeNthFromEnd2(ListNode *head, int n) {
  * http://www.cnblogs.com/aprilcheny/p/4964895.html
  * Supposed the linked list is 1 -> 2 -> 3 -> 4 and you are given the third node with value 3,
  * the linked list should become 1 -> 2 -> 4 after calling your function.
- * @param node: the node to be removed
  */
 void deleteNode(ListNode *node) {
     ListNode *del = node->next;
     node->val = del->val;
     node->next = del->next;
     delete del;
+}
+
+
+/**
+ * [LeetCode]88. Swap Nodes in Pairs链表成对逆序
+ */
+ListNode *swapPairs(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return head;
+
+    ListNode dummy(-1);
+    dummy.next = head;
+    ListNode *pre = &dummy, *pcur = head, *pnext = head->next;
+
+    while (pnext != nullptr) {
+        // 逆序
+        pre->next = pnext;
+        pcur->next = pnext->next;
+        pnext->next = pcur;
+
+        //更新
+        pre = pcur;
+        pcur = pcur->next;
+        pnext = pcur ? pcur->next: nullptr; // 判断pcur是否为空
+    }
+    return dummy.next;
+}
+
+// remove duplicate from list
+// 设置两个指针curr和next指向相邻两个节点，从头往后扫描，（1）如果某次指向的两个节点值相等，则删除next指向的节点，并且next前移；
+// （2）如果指向的两个节点值不一样，则两个节点都向前移动。
+ListNode *removeDupFromList(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return head;
+    ListNode *pcur = head;
+    ListNode *pnext = head->next;
+
+    while (pnext) {
+        if (pcur->val == pnext->val) {
+            ListNode *del = pnext;
+            pnext = pnext->next;
+            pcur->next = pnext; //不要忘记设置pcur的后继节点
+            delete del;
+        } else {
+            pcur = pnext;
+            pnext = pnext->next;
+        }
+    }
+    return head;
 }
 
 
@@ -252,6 +290,7 @@ ListNode *mergeTwoSortedList(ListNode *list1, ListNode *list2) {
 }
 
 //-----------------------------链表的快速排序 -------------------------------------------------------//
+
 // 链表快速排序 分区
 ListNode *quickSortListPartition(ListNode *start, ListNode *end) {
     int pivot = start->val;
@@ -457,4 +496,14 @@ int main(){
     ListNode *mergedList = mergeTwoSortedList(list4, list5);
     cout << endl << "Merge list4 and list 5: " << endl;
     iterateLinkedList(mergedList);
+
+    // remove dup from list
+    ListNode *removeDup = removeDupFromList(mergedList);
+    cout << endl << "Remove dup from merged list: " << endl;
+    iterateLinkedList(removeDup);
+
+    // swap node in pairs
+    ListNode *swappedList = swapPairs(mergedList);
+    cout << endl << "Swap node in pairs for merged list: " << endl;
+    iterateLinkedList(swappedList);
 }
