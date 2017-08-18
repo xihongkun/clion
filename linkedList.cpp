@@ -298,7 +298,7 @@ ListNode *quickSortListPartition(ListNode *start, ListNode *end) {
     ListNode *p = start;  //用来遍历链表的指针
     ListNode *index = start; //
 
-    while(p != nullptr) {
+    while(p != end) {
         //如果遍历到的值小于pivot, index往前走，然后index/p交换数值
         if (p->val < pivot) {
             index = index->next;
@@ -322,7 +322,7 @@ void quickSortList(ListNode *start, ListNode *end) {
     }
 }
 
-//快速排序的主函数
+//快速排序的主函数 -- 因为交换的只是节点的值，所以不会改变原链表的头指针。返回类型void即可
 void quickSortListMain(ListNode *head) {
     if (head == nullptr || head->next == nullptr) return;
     quickSortList(head, nullptr);
@@ -366,6 +366,32 @@ ListNode *insertSortList(ListNode *head) {
 }
 
 // -----------------------  End  链表的insert sort--------------------------------------------------------------//
+
+// ----------------------- 链表的归并排序-----------------------------------------------------------------------//
+ListNode *mergeSort(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return head;
+
+    ListNode *pSlow, *pFast;
+    pSlow = pFast = head;
+
+    while (pFast->next && pFast->next->next) {
+        pSlow = pSlow->next;
+        pFast = pFast->next->next;
+    }
+
+    // 将链表划分为两个链表，以便进行合并
+    ListNode *head1 = head;
+    ListNode *head2 = pSlow->next;
+    // 将链表1的结尾设为空, 断开
+    pSlow->next = nullptr;
+
+    ListNode *merged1 = mergeSort(head1);
+    ListNode *merged2 = mergeSort(head2);
+    ListNode *merged = mergeTwoSortedList(merged1, merged2);
+    return merged;
+}
+
+// End ----------------------- 链表的归并排序-----------------------------------------------------------------------//
 
 
 /**
@@ -513,25 +539,25 @@ int main(){
     cout << endl << "Partition list compared with 8: " << endl;
     iterateLinkedList(partitedList);
 
-    // 将链表快速排序
+    // 将链表4进行快速排序
     int valArray4[] = {2, 8, 1, 5, 12, 0, 23, 4, 6, 13};
     int valArray4Len = sizeof(valArray4)/sizeof(valArray4[0]);
     ListNode *list4 = initLinkedList(valArray4, valArray4Len);
+    quickSortListMain(list4);
+    cout << endl << "Now quick sort list 4: " << endl;
+    iterateLinkedList(list4);
 
+    // 将链表5进行归并排序
     int valArray5[] = {20, 7, 2, 5, 1, 9, 10, 6, 100, 34};
     int valArray5Len = sizeof(valArray5)/sizeof(valArray5[0]);
     ListNode *list5 = initLinkedList(valArray5, valArray5Len);
+    ListNode *mergeSortList5 = mergeSort(list5);
+    cout << endl << "Now merge sort list 5: " << endl;
+    iterateLinkedList(mergeSortList5);
+
 
     // 合并两个有序链表
-    quickSortListMain(list4);
-    quickSortListMain(list5);
-
-    cout << endl << "Now quick sort list 4: " << endl;
-    iterateLinkedList(list4);
-    cout << endl << "Now quick sort list 5: " << endl;
-    iterateLinkedList(list5);
-
-    ListNode *mergedList = mergeTwoSortedList(list4, list5);
+    ListNode *mergedList = mergeTwoSortedList(list4, mergeSortList5);
     cout << endl << "Merge list4 and list 5: " << endl;
     iterateLinkedList(mergedList);
 
