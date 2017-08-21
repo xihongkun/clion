@@ -470,6 +470,84 @@ ListNode *getListMid(ListNode *head) {
     return pSlow;
 }
 
+//判断链表是否有环
+bool hasCycle(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return false;
+
+    ListNode *slow, *fast;
+    slow = fast = head;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return true;
+    }
+    return false;
+}
+
+// 求链表的环入口
+ListNode *listCycleEntry(ListNode *head) {
+    if (head == nullptr || head->next == nullptr) return nullptr;
+
+    ListNode *slow, *fast;
+    slow = fast = head;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) { // 有环
+            ListNode *slow2 = head;
+            while (slow != slow2) {
+                slow = slow->next;
+                slow2 = slow2->next;
+            }
+            return slow2;
+        }
+    }
+    return nullptr;
+}
+
+
+// 求两个链表的交点. Refer: http://www.cnblogs.com/aprilcheny/p/4968190.html
+ListNode *getIntersectionNode(ListNode *head1, ListNode *head2) {
+    if (head1 == nullptr || head2 == nullptr) return nullptr;
+
+    int size1 = 0; int size2 = 0;
+    ListNode *p1 = head1; ListNode *p2 = head2;
+    while (p1){
+        size1++;
+        p1 = p1->next;
+    }
+
+    while (p2) {
+        size2++;
+        p2 = p2->next;
+    }
+
+    p1 = head1;
+    p2 = head2;
+    if (size1 != size2) {
+        int diff = size1 - size2;
+        while (diff > 0) {
+            p1 = p1->next;
+            diff--;
+        }
+
+        diff = size2 - size1;
+        while (diff > 0) {
+            p2 = p2->next;
+            diff--;
+        }
+    }
+
+    while (p1 != nullptr && p2 != nullptr && p1->val != p2->val) {
+        p1 = p1->next;
+        p2 = p2->next;
+    }
+
+    return p1;
+}
+
 int main(){
     int valArray1[] = {20, 7, 2, 5, 1, 9, 10, 6, 100};
     int valArray1Len = sizeof(valArray1)/sizeof(valArray1[0]);
@@ -574,4 +652,28 @@ int main(){
     ListNode *insertSortedList = insertSortList(swappedList);
     cout << endl << "Now re-sort the list using insertion sort: " << endl;
     iterateLinkedList(insertSortedList);
+
+
+    // 构造两个相交的链表
+    ListNode *a1 = new ListNode(20); ListNode *a2 = new ListNode(7); ListNode *a3 = new ListNode(2);
+    ListNode *a4 = new ListNode(5); ListNode *a5 = new ListNode(1); ListNode *a6 = new ListNode(9);
+    a1->next = a2; a2->next = a3; a3->next = a4;
+    a4->next = a5; a5->next = a6;
+
+    ListNode *b1 = new ListNode(1);
+    ListNode *b2 = new ListNode(8);
+    b1->next = b2;
+    b2->next = a4;
+
+    // 判断两个链表是否相交
+    ListNode *interSectionPointer = getIntersectionNode(a1, b1);
+    if (interSectionPointer != nullptr)
+        cout << endl << "The intersection node of list a1 and b1 is " << interSectionPointer->val << endl;
+
+    // 判断链表是否有环;如果有，寻找环的入口
+    a6->next = a3;
+    bool cycleFlag = hasCycle(a1);
+    if (cycleFlag)
+        cout << endl << "There is cycle in list. The cycle begins at " << listCycleEntry(a1)->val << endl;
+
 }
