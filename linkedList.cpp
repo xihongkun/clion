@@ -141,6 +141,12 @@ ListNode* addTwoList(ListNode *list1, ListNode *list2) {
         p->next = s;
         p = s;
     }
+
+    //p1 p2都遍历完毕，需要看carry的值!!!!!!
+    if (carry > 0) {
+        ListNode *s = new ListNode(carry);
+        p->next = s;
+    }
     return dummy.next;
 }
 
@@ -548,6 +554,7 @@ ListNode *getIntersectionNode(ListNode *head1, ListNode *head2) {
     return p1;
 }
 
+/*
 int main(){
     int valArray1[] = {20, 7, 2, 5, 1, 9, 10, 6, 100};
     int valArray1Len = sizeof(valArray1)/sizeof(valArray1[0]);
@@ -677,3 +684,4 @@ int main(){
         cout << endl << "There is cycle in list. The cycle begins at " << listCycleEntry(a1)->val << endl;
 
 }
+*/
