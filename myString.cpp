@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <stack>
+#include <vector>
 
 using namespace std;
 
@@ -51,7 +53,6 @@ int lengthOfLastWord(string &s) {
 }
 
 // Add binary strings
-
 string addBinary(string a, string b) {
     string result;
     int n = a.size() > b.size() ? a.size() : b.size();
@@ -75,6 +76,69 @@ string addBinary(string a, string b) {
     return result;
 }
 
+// atoi
+int myAtoi(const string &s) {
+    int sign = 1;
+    int i = 0;
+    int num = 0;
+    int n = s.size();
+    while (i < n && s[i] == ' ') i++;
+
+    if (i < n && ( s[i] == '+' || s[i] == '-')) { // 判断第一个非空字符是否为正负号
+        if (s[i] == '-') sign = -1;
+        i++;
+    }
+
+    for (; i < n; i++) {
+        if (s[i] < '0' || s[i] > '9') break;
+        if (num > INT32_MAX/10 || ( num == INT32_MAX/10 && (s[i] - '0') > INT32_MAX%10)) // 溢出
+            return sign == 1 ? INT32_MAX : INT32_MIN;
+
+        num = num * 10 + s[i] - '0';
+    }
+
+    return num * sign;
+}
+
+/*[LeetCode]35. Valid Parentheses 有效括号
+ *Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
+ * The brackets must close in the correct order, "()" and "()[]{}" are all valid but "(]" and "([)]" are not.
+ */
+bool isValidParentheses(string &s) {
+    if (s.empty()) return false;
+    int n = s.size();
+    if (n%2 != 0) return false;  // 奇数个字符
+
+    stack<char> stack1;
+
+    for (int i = 0; i < n; i++) {
+        switch (s[i]) {
+            case '(' :
+            case '[' :
+            case '{' :
+                stack1.push(s[i]);
+                break;
+
+            case ')' :
+                if (stack1.empty() || stack1.top() != '(') return false; //直接返回
+                stack1.pop();
+                break;
+            case '}' :
+                if (stack1.empty() || stack1.top() != '{') return false;
+                stack1.pop();
+                break;
+            case ']' :
+                if (stack1.empty() || stack1.top() != '[')  return false;
+                stack1.pop();
+                break;
+            default :
+                return false;
+        }
+    }
+
+    return true;
+}
+
 
 int main() {
     // Valid Palinadrome 有效回文串
@@ -88,9 +152,23 @@ int main() {
     if (ifPalindrome2)
         cout << endl << s << " Is Palinadrome" << endl;
 
-
+    // Add two binary strings
     string binaryS1 = "110";
     string binaryS2 = "11";
     string result = addBinary(binaryS1, binaryS2);
     cout << endl << "Add binary string result: " << result << endl;
+
+    // atoi
+    string aString = "-3924x8fc";
+    cout << endl << "atoi result: " << myAtoi(aString) << endl;
+
+    // valid Parentheses
+    vector<string> vs;
+    vs.push_back(")[]{}"); vs.push_back("()[]{}");
+    for (int i = 0; i < vs.size(); i++) {
+        bool ifParenthese = isValidParentheses(vs[i]);
+        if (ifParenthese) {
+        cout << endl << vs[i] << " is Valid Parentheses." << endl;
+        }
+    }
 }
