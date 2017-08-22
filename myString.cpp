@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <stack>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -139,6 +140,60 @@ bool isValidParentheses(string &s) {
     return true;
 }
 
+/* [LeetCode]50. Valid Anagram有效变位词
+ * 思路： 因为题目限定字符在26个小写字母之间，因此以vector作为Hash Table，分别统计两个字符串字母出现次数，然后再比较即可。
+ */
+bool isAnagram(string s, string t) {
+    int ss = s.size(), st = t.size();
+    if (ss != st) return false;
+
+    vector<int> vs(26, 0);
+    vector<int> vt(26, 0);
+
+    for (int i = 0; i < ss; i++) {
+        vs[s[i] - 'a']++;
+        vt[s[i] - 'a']++;
+    }
+
+    for (int j = 0; j < 26; j++){
+        if (vs[j] != vt[j]) return false;
+    }
+    return true;
+}
+
+/* [LeetCode]56. Group Anagrams 变位词分组
+ * Given an array of strings, group anagrams together.
+ * For example, given: ["eat", "tea", "tan", "ate", "nat", "bat"],
+ * Return: [ ["ate", "eat","tea"], ["nat","tan"], ["bat"] ]
+ * Note: For the return value, each inner list's elements must follow the lexicographic order.
+ * All inputs will be in lower-case.
+ */
+vector< vector<string> > anagramGroup(vector<string>& strs) {
+    int n = strs.size();
+    unordered_map<string, vector<string>> group;
+
+    for (int i = 0; i < n; i++) {
+        string key = strs[i];
+        sort(key.begin(), key.end());
+        group[key].push_back(strs[i]);
+    }
+
+    vector<vector<string>> result;
+    unordered_map<string, vector<string>>::iterator it;
+
+    for(it = group.begin(); it != group.end(); it++) {
+        vector<string> temp = it->second;
+        sort(temp.begin(), temp.end()); // 重新排序，因为结果需要排序的输出
+        result.push_back(temp);
+    }
+    return result;
+}
+
+/* Refer: http://www.cnblogs.com/aprilcheny/p/4929679.html
+ * 如果找到一对新的映射（s和t中的对应字符还没出现过），则将两个映射表的相应位置设为同一值，否则判断两个映射表的值是否相同即可。
+ */
+bool isIsomorphic(string s, string t) {
+}
 
 int main() {
     // Valid Palinadrome 有效回文串
@@ -171,4 +226,33 @@ int main() {
         cout << endl << vs[i] << " is Valid Parentheses." << endl;
         }
     }
+
+    // Valid Anagram
+    string test1 = "anagram", test2 = "nagaram";
+    bool ifAnagram = isAnagram(test1, test2);
+    if (ifAnagram)
+        cout << endl << test1 << " and " << test2 << " is anagram." << endl;
+
+    // Anagram group
+    string str[] = {"eat", "tea", "tan", "ate", "nat", "bat"};
+    vector<string> testVs(str, str+6);
+
+    vector<vector<string>> anagramResult = anagramGroup(testVs);
+    int sizeGroup = anagramResult.size();
+    for (int i = 0; i < sizeGroup; i++) {
+        cout << "Group " << i << " :" << endl;
+        int eachGroupSize = anagramResult[i].size();
+        for (int j = 0; j < eachGroupSize; j++)
+            cout << anagramResult[i][j] << " ";
+        cout << endl;
+    }
+
+    // Ismorphic Strings 同构字符串
+    //string testA = "egg", testB = "add";
+    //bool ifMorphic = isIsomorphic(testA, testB);
+    //if (ifMorphic) cout << testA << " and " << testB << " is morphic." << endl;
+
+    //string testC = "paper", testD = "title";
+    //bool ifMorphic2 = isIsomorphic(testC, testD);
+    //if (ifMorphic2) cout << testC << " and " << testD << " is morphic." << endl;
 }
