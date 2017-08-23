@@ -8,6 +8,7 @@
 #include <stack>
 #include <vector>
 #include <unordered_map>
+#include <assert.h>
 
 using namespace std;
 
@@ -101,7 +102,7 @@ int myAtoi(const string &s) {
     return num * sign;
 }
 
-/*[LeetCode]35. Valid Parentheses 有效括号
+/*[LeetCode]35. Valid Parentheses 有效括号 http://www.cnblogs.com/grandyang/p/4424587.html
  *Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
  * The brackets must close in the correct order, "()" and "()[]{}" are all valid but "(]" and "([)]" are not.
  */
@@ -113,31 +114,17 @@ bool isValidParentheses(string &s) {
     stack<char> stack1;
 
     for (int i = 0; i < n; i++) {
-        switch (s[i]) {
-            case '(' :
-            case '[' :
-            case '{' :
-                stack1.push(s[i]);
-                break;
-
-            case ')' :
-                if (stack1.empty() || stack1.top() != '(') return false; //直接返回
-                stack1.pop();
-                break;
-            case '}' :
-                if (stack1.empty() || stack1.top() != '{') return false;
-                stack1.pop();
-                break;
-            case ']' :
-                if (stack1.empty() || stack1.top() != '[')  return false;
-                stack1.pop();
-                break;
-            default :
-                return false;
+        if ( s[i] == '(' || s[i] == '[' || s[i] == '{' ) {
+            stack1.push(s[i]);
+        } else {
+            if (stack1.empty()) return false;
+            if (s[i] == ')' && stack1.top() != '(') return false;
+            if (s[i] == ']' && stack1.top() != '[') return false;
+            if (s[i] == '}' && stack1.top() != '{') return false;
+            stack1.pop();
         }
     }
-
-    return true;
+    return stack1.empty(); // 最终栈中可能有元素，比如((
 }
 
 /* [LeetCode]50. Valid Anagram有效变位词
@@ -189,10 +176,91 @@ vector< vector<string> > anagramGroup(vector<string>& strs) {
     return result;
 }
 
-/* Refer: http://www.cnblogs.com/aprilcheny/p/4929679.html
+/* [LeetCode]51. Ismorphic Strings 同构字符串
+ * Refer: http://www.cnblogs.com/aprilcheny/p/4929679.html
  * 如果找到一对新的映射（s和t中的对应字符还没出现过），则将两个映射表的相应位置设为同一值，否则判断两个映射表的值是否相同即可。
  */
 bool isIsomorphic(string s, string t) {
+    int ss = s.size(), st = t.size();
+    if (ss != st) return false;
+
+    vector<int> vs(128, -1);
+    vector<int> vt(128, -1);
+
+    for (int i = 0; i < ss; i ++) {
+        if (vs[s[i]] != vt[t[i]]) return  false;
+        vs[s[i]] = i;
+        vt[t[i]] = i;
+    }
+    return true;
+}
+
+// [LeetCode]44. Implement strStr() 实现strStr()函数. Refer http://www.cnblogs.com/grandyang/p/4606696.html
+int strStr(string haystack, string needle) {
+    if (needle.empty()) return 0;
+    int m = haystack.size(), n = needle.size();
+    if (n > m) return -1;
+
+    for (int i = 0; i < m; i++) {   //这里可以把循环上界设置为m-n，减少循环次数
+        int j = 0;
+        for (; j < n; j++) {
+            if (haystack[i+j] != needle[j]) break; //可以把j理解为待比较的字符在haystack和needle里的偏移
+        }
+        if (j == n) return i; // 匹配到了
+    }
+    return -1;
+}
+
+// Longest Common Prefix 最长共同前缀
+string longestCommonPrefix(vector<string>& strs) {
+    if (strs.empty()) return "";
+
+    for (int index = 0; index < strs[0].size(); index++) { //从位置0开始，逐个比较第一个字符，遇到不相等就退出
+        for (int i = 1; i < strs.size(); i++) {
+            if (index >= strs[i].size() || strs[i][index] != strs[0][index]) return strs[0].substr(0, index);
+        }
+    }
+    return strs[0];
+}
+
+/* [LeetCode]36. Compare Version Numbers 版本号比较
+ * Compare two version numbers version1 and version2.
+ * If version1 > version2 return 1, if version1 < version2 return -1, otherwise return 0.
+ * You may assume that the version strings are non-empty and contain only digits and the . character.
+ */
+vector<string> split(const string &str, const char delim) {
+    vector<string> result;
+
+    int n = str.size();
+    int start = 0;
+    for (int i = 0; i < n; i++) {
+        if (str[i] == delim) {
+            string temp(str.begin() + start, str.begin() + i);
+            if (!temp.empty()) result.push_back(temp);
+            start = i + 1;
+        }
+    }
+
+    // 最后一段
+    string s(str.begin() + start, str.end());
+    if (!s.empty()) result.push_back(s);
+    return  result;
+}
+
+int compareVersion(string version1, string version2) {
+    vector<string> vs1 = split(version1, '.');
+    vector<string> vs2 = split(version2, '.');
+    int s1 = vs1.size(), s2 = vs2.size();
+
+    int i = 0, j =0;
+    for (; i < s1 && j < s2; i++, j++) { // 注意：&& ！
+        if (stoi(vs1[i]) < stoi(vs2[j])) return -1;  // stoi用来转哈string的，atoi转化的是char*. 如果要用atoi, 需要用string.c_str()转化成c字符串
+        if (stoi(vs1[i]) > stoi(vs2[j])) return 1;
+    }
+    if (i < s1) return 1; // vs2已经遍历完
+    if (j < s2) return -1;
+
+    return 0;
 }
 
 int main() {
@@ -248,11 +316,27 @@ int main() {
     }
 
     // Ismorphic Strings 同构字符串
-    //string testA = "egg", testB = "add";
-    //bool ifMorphic = isIsomorphic(testA, testB);
-    //if (ifMorphic) cout << testA << " and " << testB << " is morphic." << endl;
+    string testA = "egg", testB = "add";
+    bool ifMorphic = isIsomorphic(testA, testB);
+    if (ifMorphic) cout << endl << testA << " and " << testB << " is morphic." << endl;
 
-    //string testC = "paper", testD = "title";
-    //bool ifMorphic2 = isIsomorphic(testC, testD);
-    //if (ifMorphic2) cout << testC << " and " << testD << " is morphic." << endl;
+    string testC = "foo", testD = "bar";
+    bool ifMorphic2 = isIsomorphic(testC, testD);
+    if (ifMorphic2) cout << endl << testC << " and " << testD << " is morphic." << endl;
+
+    // strStr
+    int index = strStr("hello, world", "ll");
+    cout << endl << "Index location: " << index << endl;
+
+    // 最长公共前缀
+    string strWithPrefix[] = {"geeksforgeeks", "geeks", "geek", "geezer"};
+    vector<string> vStrWithPrefix(strWithPrefix, strWithPrefix+4);
+    string commonPrefix = longestCommonPrefix(vStrWithPrefix);
+    cout << endl << "The longest common prefix is: " << commonPrefix << endl;
+
+    int compare = compareVersion("1.1.0", "1.1.0.1");
+    assert(compare ==  -1);
+    int compare2 = compareVersion("0.12.10.4", "0.12.9");
+    assert(compare2 == 1);
+
 }
