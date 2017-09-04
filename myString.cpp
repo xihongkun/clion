@@ -263,6 +263,7 @@ int compareVersion(string version1, string version2) {
     return 0;
 }
 
+/*
 int main() {
     // Valid Palinadrome 有效回文串
     string s = "A man, a plan, a canal: Panama";
@@ -340,3 +341,4 @@ int main() {
     assert(compare2 == 1);
 
 }
+*/

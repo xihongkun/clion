@@ -80,7 +80,8 @@ ListNode* reverseBetween(ListNode* head, int m, int n) {
     ListNode *head2 = pre; //head2作为反转部分的头节点，每次反转都用头插法往head2后面插入
     ListNode *pCur = pre->next;
 
-    // 每次将pCur之后的节点（move）移动到head2之后的节点，重复n-m次
+    // 每次将pCur之后的节点（move）移动到head2之后的节点，重复n-m次.
+    // 注意： 不是从pre->next 开始移动。
     for (int j = m; j < n; j++) {
         ListNode *move = pCur->next;
         // pCur 指向move的下一个节点。这样在下一次循环的时候会用上面的语句 更新move
