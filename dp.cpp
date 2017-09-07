@@ -156,6 +156,111 @@ bool wordBreak(const string &s, unordered_set<string> &dict) {
     return f[len];
 }
 
+/* Longest Palindromic Substring
+ * 思路： 设状态f(i,j)表示区间[i,j]是否为回文串，则状态转移方程为：
+ * 1. 如果i==j， 则f(i,j)=true -- 对角线元素全部为true
+ * 2. 如果j=i+1, 则f(i,j)=(S[i]==S[j])
+ * 3. 如果j>i+1, 则f(i,j)=(S[i]==S[j] && f(i+1, j-1))
+ */
+string longestPalindrome(const string &s) {
+    int n = s.size();
+    bool f[n][n];
+    fill_n(&f[0][0], n*n, false); // f[0][0]={false}在不同的编译器上可能有不同的结果。
+    int max_len = 1; // 初值。任何一个字符都可以构成回文串，赋初值1
+    int start = 0; //记录回文串的长度和起始位置
+
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i <= j; i++) {
+            if (j == i || ( j == i + 1 && s[i] == s[j]) ||
+                    (j > i + 1 && s[i] == s[j] && f[i+1][j-1])) {
+
+                f[i][j] = true;
+            }
+            if (f[i][j] && (j - i + 1) > max_len) {
+                max_len = j - i + 1;
+                start = i;
+            }
+        }
+
+    }
+    return s.substr(start, max_len);
+}
+
+/* Palindrome Partitioning II
+ * Given a string s, partition s such that every substring of the partition is a palindrome.
+ * Return the minimum cuts needed for a palindrome partitioning of s.
+ * For example, given s = ”aab”,
+ * Return 1 since the palindrome partitioning [”aa”,”b”] could be produced using 1 cut.
+ * 思路：设状态f[i,j]表示S[i,j]是否为回文串。则可以用上面一题的方法得到f矩阵的值。
+ * 设count[j+1]表示区间[0,j]的最小分割, 如果[i,j]是回文串，则count[j+1] = min(count[i]+1) 0=<i<=j
+ */
+int minCut(const string &s) {
+    int n = s.size();
+
+    bool f[n][n]; //dp: 记录[i,j]是否为回文串
+    fill_n(&f[0][0], n*n, false);
+
+    int count[n+1]; // 状态count[i]表示[0，i-1]的最小cut数
+    // count[i]的边界条件
+    count[0] = -1; //
+    for (int i = 1; i < n + 1; i++) {
+        count[i] = i; //最差情况，每一个字符都分割
+    }
+
+    for (int j = 0; j < n; j++){
+        for (int i = 0; i <= j; i++) {
+            if ( i == j || ( j == i + 1 && s[i] == s[j] ) || (j > i + 1 && s[i] == s[j] && f[i+1][j-1])) {
+                f[i][j] = true;
+                count[j+1] = min(count[j+1], count[i] + 1);
+            }
+        }
+    }
+
+    return count[n];
+}
+
+
+/* Decode Ways
+ * A message containing letters from A-Z is being encoded to numbers using the following mapping:
+ * 'A' -> 1, 'B' -> 2, ... 'Z' -> 26
+ * Given an encoded message containing digits, determine the total number of ways to decode it.
+ * For example, Given encoded message "12", it could be decoded as "AB" (1 2) or "L" (12). The number of ways decoding "12" is 2.
+ * 思路：设状态f[i]表示[0,i-1](或者理解为前i个字符)的解码方法。则状态转移方程可以通过分析[i-2,i-1]的值得出：
+ * 1. 如果 10 <= [i-2,i-1] <= 26： (s[i-2] == '1 || s[i-2] == '2'')
+ *    1.1 如果为10，或20， 则f[i] = f[i-2]
+ *    1.2 否则，f[i] = f[i-1] + f[i-2]
+ * 2. 如果 s[i-2] == '0'
+ *    2.1 '00'  直接return 0
+ *    2.2 '01'-'09' f[i] = f[i-1]
+ * 3. 其他情况，如27-99, 则f[i] = f[i-1]
+ */
+int numDecodings(const string &s) {
+    if (s.empty() || s[0] == '0') return 0;
+    int n = s.size();
+    int f[n+1];
+    fill_n(&f[0], n, 0);
+
+    f[1] = 1; //初始状态
+    f[0] = 1; //注意： f[2]的最大可能值是2.所以这里设置f[0]=1
+    for (int i = 2; i < n + 1; i++) {
+        if (s[i-2] == '0') {
+            if (s[i-1] == '0') return 0; // 00
+            f[i] = f[i-1];   // 01-09
+        } else if (s[i-2] == '1') {
+            if (s[i - 1] == '0') f[i] = f[i - 2]; // 10
+            else f[i] = f[i - 1] + f[i - 2]; // 11-19
+        } else if (s[i-2] == '2') {
+            if (s[i-1] == '0') f[i] = f[i-2]; // 20
+            else if (s[i-1] >= '1' && s[i-1] <= '6') f[i] = f[i-1] + f[i-2]; //21-26
+            else f[i] = f[i-1]; // 27-29
+        } else {
+            f[i] = f[i-1]; //其他
+        }
+    }
+    return f[n];
+}
+
+/*
 int main() {
     // minimum path sum from top to bottom
     vector<vector<int>> v = {{2}, {3,4}, {6,5,7}, {4,1,8,3}};
@@ -184,8 +289,19 @@ int main() {
     bool result2 = wordBreak("letcode", dict);
     assert(result1);
     assert(!result2);
+
+    // 最长回文子串
+    string test = "aba12321";
+    string result = longestPalindrome(test);
+    cout << endl << "The longest palindrome substr in " << test << " is " << result << endl;
+
+    // min cut
+    int minCutNum = minCut(test);
+    cout << endl << "Min cut number for " << test << " is " << minCutNum << endl;
+
+    // Decode ways
+    string s = "1213";
+    int numWays = numDecodings(s);
+    cout << endl << "Number of decoding " << s << " is " << numWays << endl;
 }
-
-
-
-
+*/
