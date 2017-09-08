@@ -109,7 +109,7 @@ int minMeetingRooms(vector<Interval> &intervals) {
     return q.size();
 }
 
-
+/*
 int main() {
     // reverse integer
     int a = 12345;
@@ -141,3 +141,4 @@ int main() {
         cout << endl << "Can attend all meetings" << endl;
 
 }
+*/

@@ -186,6 +186,43 @@ string longestPalindrome(const string &s) {
     return s.substr(start, max_len);
 }
 
+/* Palindrome Partitioning
+ * Return all possible palindrome partitioning of s.
+ */
+void dfsPalindrome(string &s, vector<vector<bool>> &f, vector<string> &path, vector<vector<string>> &result, int start) {
+    if (start == s.size()){
+        result.push_back(path);
+        return;
+    }
+
+    for (int i = start; i < s.size(); i++) {
+        if (f[start][i]) {
+            path.push_back(s.substr(start, i-start+1));
+            dfsPalindrome(s, f, path, result, i+1);
+            path.pop_back();
+        }
+    }
+}
+
+vector<vector<string>> partition(string s) {
+    int n = s.size();
+    vector<vector<bool>> f(n, vector<bool>(n, false));
+
+    //f[i][j]表示[i,j]是否为回文串，先求f
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i <=j; i++) {
+            if (i == j || (j == i + 1 && s[i] == s[j]) || j > i + 1 && s[i] == s[j] && f[i+1][j-1]) {
+                f[i][j] = true;
+            }
+        }
+    }
+
+    vector<vector<string>> result;
+    vector<string> path;
+    dfsPalindrome(s, f, path, result, 0);
+    return  result;
+}
+
 /* Palindrome Partitioning II
  * Given a string s, partition s such that every substring of the partition is a palindrome.
  * Return the minimum cuts needed for a palindrome partitioning of s.
@@ -232,7 +269,7 @@ int minCut(const string &s) {
  * 2. 如果 s[i-2] == '0'
  *    2.1 '00'  直接return 0
  *    2.2 '01'-'09' f[i] = f[i-1]
- * 3. 其他情况，如27-99, 则f[i] = f[i-1]
+ * 3. 其他情况，如27-99, 则f[i] = f[i-1] (s[i-1]== 0除外)
  */
 int numDecodings(const string &s) {
     if (s.empty() || s[0] == '0') return 0;
@@ -254,13 +291,59 @@ int numDecodings(const string &s) {
             else if (s[i-1] >= '1' && s[i-1] <= '6') f[i] = f[i-1] + f[i-2]; //21-26
             else f[i] = f[i-1]; // 27-29
         } else {
+            if (s[i-1] == '0') return 0;
             f[i] = f[i-1]; //其他
         }
     }
     return f[n];
 }
 
-/*
+/* Unique paths
+ * 输入矩阵的维数，How many possible unique paths are there?
+ * 注意这道题与minimum path summary的区别，这道题是求路径数。
+ */
+int uniquePaths(int m, int n) {
+    int f[m][n] = {0};
+    for (int i = 0; i < m; i++) f[i][0] = 1; //第一列，只能从上往下走，任何一个节点只有一条路
+    for (int j = 1; j < n; j++) f[0][j] = 1; //第一行
+
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            f[i][j] = f[i-1][j] + f[i][j-1];
+        }
+    }
+    return f[m-1][n-1];
+}
+
+/* Unique paths with obstacles
+ * Now consider if some obstacles are added to the grids. How many unique paths would there be?
+ * An obstacle and empty space is marked as 1 and 0 respectively in the grid.
+ * 注意：1. 边界的状态f[i][0]和f[0][j]
+ * 2. 中间值的状态：如果S[i][j] == 1, f[i][j]直接为0；否则f[i][j] = f[i-1][j] = f[i][j-1]
+ */
+int uniquePathsWithObstacles(vector<vector<int>> &obstacleGrid) {
+    int m = obstacleGrid.size();
+    int n = obstacleGrid[0].size();
+    int f[m][n] = {0};
+    for (int i = 0; i < m; i++){
+        if (obstacleGrid[i][0] == 0) f[i][0] = 1;
+        else break; //直接跳出循环，因为后面的元素因为障碍的存在都不可达了
+    }
+
+    for (int j = 1; j < n; j++) {
+        if (obstacleGrid[0][j] == 0) f[0][j] = 1;
+        else break;
+    }
+
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            if (obstacleGrid[i][j] == 1)  f[i][j] = 0;
+            else f[i][j] = f[i-1][j] = f[i][j-1];
+        }
+    }
+    return f[m-1][n-1];
+}
+
 int main() {
     // minimum path sum from top to bottom
     vector<vector<int>> v = {{2}, {3,4}, {6,5,7}, {4,1,8,3}};
@@ -299,9 +382,23 @@ int main() {
     int minCutNum = minCut(test);
     cout << endl << "Min cut number for " << test << " is " << minCutNum << endl;
 
+    // 输出所有的回文串组合
+    string s = "aab";
+    vector<vector<string>> output = partition(s);
+    for (auto v : output) {
+        cout << "One possible cut: ";
+        for (auto s: v) {
+            cout << s << ",";
+        }
+        cout << endl;
+    }
+
     // Decode ways
-    string s = "1213";
-    int numWays = numDecodings(s);
-    cout << endl << "Number of decoding " << s << " is " << numWays << endl;
+    string string1 = "1213";
+    int numWays = numDecodings(string1);
+    cout << endl << "Number of decoding " << string1 << " is " << numWays << endl;
+
+    //Unique paths
+    int paths = uniquePaths(3, 3); //3*3的矩阵应该有6条路径
+    assert(paths == 6);
 }
-*/
