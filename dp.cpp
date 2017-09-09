@@ -195,7 +195,8 @@ void dfsPalindrome(string &s, vector<vector<bool>> &f, vector<string> &path, vec
         return;
     }
 
-    for (int i = start; i < s.size(); i++) {
+    for (int i = start; i < s.size(); i++) { //理解：这里i不会每次都递归。只有符合f[start][i]的i才会进入递归。
+        cout << endl << "start: " << start << ", i: " << i << endl;
         if (f[start][i]) {
             path.push_back(s.substr(start, i-start+1));
             dfsPalindrome(s, f, path, result, i+1);
@@ -344,6 +345,7 @@ int uniquePathsWithObstacles(vector<vector<int>> &obstacleGrid) {
     return f[m-1][n-1];
 }
 
+/*
 int main() {
     // minimum path sum from top to bottom
     vector<vector<int>> v = {{2}, {3,4}, {6,5,7}, {4,1,8,3}};
@@ -402,3 +404,4 @@ int main() {
     int paths = uniquePaths(3, 3); //3*3的矩阵应该有6条路径
     assert(paths == 6);
 }
+*/

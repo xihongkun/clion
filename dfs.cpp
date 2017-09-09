@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <assert.h>
 
 using namespace std;
 
@@ -124,7 +125,8 @@ bool nextPermutation(vector<int> &num) { //如果找到下一个排列，返回t
  */
 void dfsSubnets(vector<int> &S, vector<int> &path, vector<vector<int>> &result, int start) {
     result.push_back(path);
-    for (int i = start; i < S.size(); i++) { //收敛条件由start控制
+    for (int i = start; i < S.size(); i++) { //收敛条件由start控制。在最顶层的递归里，start总是为0的。如果有start>0,必定是借助i进入了下一层
+        // cout << endl << "start: " << start << ", i: " << i << endl;
         path.push_back(S[i]);
         dfsSubnets(S, path, result, i + 1); // 注意：是i+1，不是start+1 !!!
         path.pop_back();
@@ -164,7 +166,146 @@ vector<vector<int>> subsetsWithDup(vector<int> &S) {
     return  result;
 }
 
-/*
+/* Combination Sum
+ * Given a set of numbers C and a target number T, find all unique combinations in C where the the numbers sum to T.
+ * 每个元素可以在一个path里出现多次。
+ * For example, given candidate set 2,3,6,7 and target 7, A solution set is: [7] [2, 2, 3]
+ * 思路： 在dfs里使用gap，结合startIndex进行状态扩展。
+ */
+void dfsCombinationSum(vector<int> &num, int start, vector<int> &path, vector<vector<int>> &result, int gap) {
+    if (gap == 0) {
+        result.push_back(path);
+        return;
+    }
+
+    for (int i = start; i < num.size(); i++) {
+        if (gap < num[i])  return; //剪枝
+        path.push_back(num[i]);
+        dfsCombinationSum(num, i, path, result, gap-num[i]);
+        path.pop_back();
+    }
+}
+
+vector<vector<int>> combinationSum(vector<int> &num, int target) {
+    sort(num.begin(), num.end());
+    vector<int> path;
+    vector<vector<int>> result;
+
+    dfsCombinationSum(num, 0, path, result, target);
+    return result;
+}
+
+/* Combination Sum II
+ * 跟上题不同，每个元素在一个path里只能被选一次。
+ */
+void dfsCombinationSum2(vector<int> &num, int start, vector<int> &path, vector<vector<int>> &result, int gap) {
+    if (gap == 0) {
+        result.push_back(path);
+        return;
+    }
+
+    for (int i = start; i < num.size(); i++) {
+        if (gap < num[i]) return; //剪枝
+
+        if (i > start && num[i] == num[i-1]) continue; //重复元素，跳出本次递归。解释见上面的Subsets 题目。原理相同。
+
+        path.push_back(num[i]);
+        dfsCombinationSum2(num, i+1, path, result, gap-num[i]);
+        path.pop_back();
+    }
+}
+
+vector<vector<int>> combinationSum2(vector<int> num, int target) {
+    sort(num.begin(), num.end());
+    vector<int> path;
+    vector<vector<int>> result;
+    dfsCombinationSum2(num, 0, path, result, target);
+    return result;
+}
+
+/* 10.11 Word Search
+ * Given a 2D board and a word, find if the word exists in the grid.
+ * The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those
+ * horizontally or vertically neighbouring. The same letter cell may not be used more than once.
+ * For example, Given board =
+ * [ ["ABCE"],
+ *   ["SFCS"],
+ *   ["ADEE"] ]
+ * word = "ABCCED", -> returns true,
+ * word = "SEE", -> returns true,
+ * word = "ABCB", -> returns false.
+ */
+bool dfsWordSearch(vector<vector<char>> &board, string & word, int index, int x, int y, vector<vector<bool>> &visited) {
+    if (index == word.size()) return true; //收敛条件
+    if (x < 0 || y < 0 || x >= board.size() || y >= board[0].size())  //终止条件
+        return false;
+
+    if (visited[x][y]) return false; //已经访问过， 剪枝
+    if (board[x][y] != word[index]) return false; //不相等，剪枝
+
+    // 开始状态扩展
+    visited[x][y] = true;
+    bool ret = dfsWordSearch(board, word, index + 1, x - 1, y, visited) || // 上
+               dfsWordSearch(board, word, index + 1, x + 1, y, visited) || // 下
+               dfsWordSearch(board, word, index + 1, x, y - 1, visited) || // 左
+               dfsWordSearch(board, word, index + 1, x, y + 1, visited);   //右
+    visited[x][y] = false;
+    return ret;
+}
+
+bool wordSearch(vector<vector<char>> &board, string word) {
+    int m = board.size();
+    int n = board[0].size();
+
+    vector<vector<bool>> visited(m, vector<bool>(n, false));
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dfsWordSearch(board, word, 0, i, j, visited)) //只要有一个返回true，就可以结束了. 注意： 这里每次是从x, y 开始!!
+                return true;
+        }
+    }
+    return false;
+}
+
+/* Number of islands
+ * 本质是求矩阵中 '1'连续区域的个数
+ */
+
+void dfsNumIslands(vector<vector<int>> &grid, int x, int y, vector<vector<bool>> &visited) {
+    // 本题不需要收敛条件，因为该dfs函数的作用是递归找到'1'， 并把visited[x,y]设为true, 然后扩展状态到上下左右的位置。
+    // 也不需要再恢复状态，把能遍历到的'1'都遍历到，并设置visited, 任务就完成了
+    if (x < 0 || y < 0 || x >= grid.size() || y >= grid[0].size()) return; //终止条件
+
+    if (grid[x][y] != 1) return; // 不用管‘0’
+    if (visited[x][y]) return;
+
+    visited[x][y] = true;
+    dfsNumIslands(grid, x - 1, y, visited);
+    dfsNumIslands(grid, x + 1, y, visited);
+    dfsNumIslands(grid, x, y -1, visited);
+    dfsNumIslands(grid, x, y + 1, visited); //注意，不要再恢复visited[x][y]了!!
+}
+
+int numIslands(vector<vector<int>> &grid) {
+    int m = grid.size();
+    int n = grid.size();
+
+    vector<vector<bool>> visited(m, vector<bool>(n, false));
+    int count = 0;
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (grid[i][j] == 1 && !visited[i][j]){
+                dfsNumIslands(grid, i, j, visited);
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+
 int main() {
     // Permutations
     vector<int> v = {1,2,3,4};
@@ -221,5 +362,42 @@ int main() {
             cout << i << ",";
         }
     }
+
+    // Combination Sum
+    vector<int> list = {2,3,6,7};
+    int target = 7;
+    vector<vector<int>> sumResult = combinationSum(list, target);
+    for (auto s : sumResult) {
+        cout << endl << "Combination Sum: One combination: ";
+        for (auto i: s) {
+            cout << i << ",";
+        }
+    }
+
+    // Combination Sum ii
+    vector<int> list2 = {10, 1, 2, 7, 6, 1, 5};
+    int target2 = 8;
+    vector<vector<int>> sumResult2 = combinationSum2(list2, target2);
+    for (auto s : sumResult2) {
+        cout << endl << "Combination Sum II : One combination: ";
+        for (auto i: s) {
+            cout << i << ",";
+        }
+    }
+
+    // Word search
+    vector<vector<char>> searchGrid = {{'A', 'B', 'C', 'E'}, {'S', 'F', 'C', 'S'}, {'A', 'D', 'E', 'E'}};
+    vector<string> search = {"ABCCED", "SEE", "ABCB"};
+    bool searched[3] = {false};
+    for (int i = 0; i < search.size(); i++) {
+        searched[i] = wordSearch(searchGrid, search[i]);
+    }
+    assert(searched[0] && searched[1] && !searched[2]);
+
+    // Number of islands
+    vector<vector<int>> grid1 = {{1,1,1,1,0}, {1,1,0,1,0}, {1,1,0,0,0}, {0,0,0,0,0}};
+    vector<vector<int>> grid2 = {{1,1,0,0,0}, {1,1,0,0,0}, {0,0,1,0,0}, {0,0,0,1,1}};
+    int numGrid1 = numIslands(grid1);
+    int numGrid2 = numIslands(grid2);
+    assert(numGrid1 == 1 && numGrid2 == 3);
 }
-*/
