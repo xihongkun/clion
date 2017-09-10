@@ -305,7 +305,7 @@ int numIslands(vector<vector<int>> &grid) {
     return count;
 }
 
-
+/*
 int main() {
     // Permutations
     vector<int> v = {1,2,3,4};
@@ -401,3 +401,4 @@ int main() {
     int numGrid2 = numIslands(grid2);
     assert(numGrid1 == 1 && numGrid2 == 3);
 }
+*/
