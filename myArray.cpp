@@ -166,7 +166,37 @@ vector<vector<int>> threeSum(vector<int> &num) {
     return result;
 }
 
-/*
+/* Find kth largest element in array.
+ */
+int partition(vector<int> &nums, int low, int high) {
+    int pivot = nums[low];
+    int i = low, j = high;
+
+    while (i < j) {
+        while (i < j && nums[j] <= pivot) j--;   //从右往左找比pivot大的，换到左边
+        nums[i] = nums[j];
+        while (i < j && nums[i] >= pivot) i++;   //从左往右找比pivot小的，换到右边
+        nums[j] = nums[i];
+    }
+    // 此时i=j, 填充pivot
+    nums[i] = pivot;
+    return i;
+}
+
+int select (vector<int> &nums, int low, int high, int k) {
+    if (low == high) return nums[low];
+
+    int pos = partition(nums, low, high);
+    if (pos == k - 1) return nums[pos];
+    if (pos > k - 1) return select(nums, low, pos - 1, k);
+    if (pos < k - 1) return select(nums, pos + 1, high, k);
+}
+
+int findKthLargest(vector<int>& nums, int k) {
+    return select(nums, 0, nums.size() - 1, k);
+}
+
+
 int main(){
     // remove elements.
     int elementArray[] = {1,2,1,1,4,5,6,2};
@@ -203,5 +233,10 @@ int main(){
             cout << i << ",";
         }
     }
+
+    // Kth largest
+    vector<int> testArray = {9,3,2,4,8};
+    int thirdLargest = findKthLargest(testArray, 3);
+    assert(thirdLargest == 4);
 }
-*/
+

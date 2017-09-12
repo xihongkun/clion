@@ -470,7 +470,7 @@ ListNode *getListMid(ListNode *head) {
     ListNode *pSlow, *pFast;
     pSlow = pFast = head;
 
-    while (pFast && pFast->next) { //如果要返回中间结点的第一个节点: while (pFast && pFast->next->next)
+    while (pFast && pFast->next) { //如果要返回中间结点的第一个节点: while (pFast->next && pFast->next->next)
         pSlow = pSlow->next;
         pFast = pFast->next->next;
     }

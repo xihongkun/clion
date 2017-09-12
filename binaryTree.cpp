@@ -234,6 +234,57 @@ TreeNode *buildTreeFromInAndPostOrder(vector<int> &inorder, vector<int> &postord
     return buildTreeFromInAndPostOrder(inorder, 0, n - 1, postorder, 0, n - 1);
 }
 
+/* Unique Binary Search Trees
+ * Given n, how many structurally unique BST’s (binary search trees) that store values 1,...n?
+ * For example, Given n = 3, there are a total of 5 unique BST’s.
+ * 思路：令状态f[i]表示[1,i]能表示的BST的数目(或者i个数能表示的BST个数)，则f[i]=
+ *  f[i-1] * f[0]  // i为根. [1,i-1]为左子树,右子树为空
+ * +f[i-2] * f[1]  // i-1为根. [1, i-2]为左子树, i为右子树.
+ * + ...
+ * +f[0] * f[i-1]  // 1为根. i-1个数都在右子树上.
+ * 总结： f[i] = 求和(f[i-j]*f[j-1]), for j = 1; j <= i; j++
+ */
+int numTrees(int n) {
+    int f[n+1] = {0};
+    f[0] = 1;
+    f[1] = 1;
+    for (int i = 2; i <= n; i++) {
+        for (int j = 1; j <= i; j++) {
+            f[i] += f[i-j] * f[j-1];
+        }
+    }
+    return f[n];
+}
+
+/* Validate Binary Search Tree
+ */
+bool isValidBST(TreeNode *root, int lower, int higher) {
+    if (root == nullptr) return true;
+    return (root->val > lower && root->val < higher)
+           && isValidBST(root->left, lower, root->val)
+           && isValidBST(root->right, root->val, higher);
+}
+bool isValidBST(TreeNode *root) {
+    return isValidBST(root, INT32_MIN, INT32_MAX);
+}
+
+/* Convert Sorted Array to Binary Search Tree.
+ * Given an array where elements are sorted in ascending order, convert it to a height balanced BST.
+ */
+TreeNode *sortedArrayToBST(vector<int> &num, int start, int end) {
+    if (start > end) return nullptr;     // Start > end 时，不再构建cur及左右子树，直接返回nullptr. nullptr可以在长一层作为左右子树.
+    int mid = (start + end) / 2;         // 这是二叉树的递归构建中常用的技巧.
+    TreeNode *cur = new TreeNode(num[mid]);    //自顶向下构建 -- 先构建parent节点,然后递归构建左右子树.
+    cur->left = sortedArrayToBST(num, start, end - 1);
+    cur->right = sortedArrayToBST(num, end + 1, end);
+
+    return cur;
+}
+TreeNode *sortedArrayToBST(vector<int> &num) {
+    return sortedArrayToBST(num, 0, num.size() - 1);
+}
+
+/*
 int main(){
     TreeNode *root = new TreeNode(1);
     TreeNode *layer2Left = new TreeNode(4);
@@ -295,7 +346,5 @@ int main(){
     TreeNode *rootFromInAndPostOrder = buildTreeFromInAndPostOrder(inorder, postorder);
     cout << endl << "PreOrder New Constructed Tree from InOrder and postOrder: " << endl;
     preOrder2(rootFromInAndPostOrder);
-
-
-
 }
+*/
