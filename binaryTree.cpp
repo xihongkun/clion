@@ -4,6 +4,7 @@
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <assert.h>
 
 using namespace std;
 
@@ -284,7 +285,36 @@ TreeNode *sortedArrayToBST(vector<int> &num) {
     return sortedArrayToBST(num, 0, num.size() - 1);
 }
 
-/*
+/* Same Tree
+ */
+bool isSameTree(TreeNode *p, TreeNode *q) {
+    if (p == nullptr || q == nullptr) {
+        if (p == nullptr && q == nullptr) return true;
+        else return false;
+    }
+    return (p->val == q->val)
+           && isSameTree(p->left, q->left)
+           && isSameTree(p->right, q->right);
+}
+
+/* Symmetric Tree -- 对称二叉树
+ */
+bool isSymmetric(TreeNode *left, TreeNode *right) {
+    if (left == nullptr || right == nullptr) {
+        if (left == nullptr && right == nullptr) return true;
+        else return false;
+    }
+
+    return (left->val == right->val)
+           && isSymmetric(left->left, right->right)
+           && isSymmetric(left->right, right->left);
+}
+
+bool isSymmetric(TreeNode *root) {
+    if (root == nullptr) return false;
+    return isSymmetric(root->left, root->right);
+}
+
 int main(){
     TreeNode *root = new TreeNode(1);
     TreeNode *layer2Left = new TreeNode(4);
@@ -346,5 +376,7 @@ int main(){
     TreeNode *rootFromInAndPostOrder = buildTreeFromInAndPostOrder(inorder, postorder);
     cout << endl << "PreOrder New Constructed Tree from InOrder and postOrder: " << endl;
     preOrder2(rootFromInAndPostOrder);
+
+    bool ifSameTree = isSameTree(root, root);
+    assert(ifSameTree);
 }
-*/

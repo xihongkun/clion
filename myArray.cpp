@@ -196,7 +196,72 @@ int findKthLargest(vector<int>& nums, int k) {
     return select(nums, 0, nums.size() - 1, k);
 }
 
+/* Single Number. 一个数组中，每个元素都出现偶数次，except one. Find the single one.
+ * 思路： 用异或的方法.
+ */
+int getSingleNumber(int A[], int n) {
+    int x = 0;
+    for (int i = 0; i < n; i++) {
+        x ^= A[i];
+    }
+    return x;
+}
 
+/* Get 2 Single Numbers. 找出出现次数为一次的两个数
+ * 思路： 先计算异或结果。然后根据结果中第一个1比特位的index，把数组划分为2部分。在每个部分中分别找出single number
+ */
+vector<int> get2SingleNumbers(int A[], int n) {
+    int x = 0;
+    for (int i = 0; i < n; i++) {
+        x ^= A[i];
+    }
+
+    int size = sizeof(int) * 8;
+    int index = 0; //记录首个1 bit出现的index
+    for (; index < size; index++) {
+        if ((x >> index) & 1) break;
+    }
+
+    int num1 = 0, num2 = 0; //按照index位置是否为1， 把原数组分为两部分
+    for (int i = 0; i < n; i++) {
+        if ((A[i] >> index) & 1) {
+            num1 ^= A[i];
+        } else {
+            num2 ^= A[i];
+        }
+    }
+    vector<int> result;
+    result.push_back(num1);
+    result.push_back(num2);
+    return result;
+}
+
+/* Single Number II
+ * Given an array of integers, every element appears three times except for one. Find that single one.
+ */
+int getSingleNumber2(int A[], int n) {
+    int size = sizeof(int) * 8; // 存放int的每一位运算结果
+    int W[size];
+    fill_n(&W[0], size, 0);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < size; j++) {
+            W[j] += (A[i] >> j) & 1;
+        }
+    }
+    for (int j = 0; j < size; j++) {
+        W[j] %= 3;
+    }
+
+    int result = 0;
+    for (int j = 0; j < size; j++) {
+        result += (W[j] << j);
+    }
+
+    return result;
+}
+
+/*
 int main(){
     // remove elements.
     int elementArray[] = {1,2,1,1,4,5,6,2};
@@ -238,5 +303,23 @@ int main(){
     vector<int> testArray = {9,3,2,4,8};
     int thirdLargest = findKthLargest(testArray, 3);
     assert(thirdLargest == 4);
-}
 
+    //Single Number
+    int singleNumberArray[] = {1,2,2,3,3,4,4,4,4};
+    int singleNumber = getSingleNumber(singleNumberArray, sizeof(singleNumberArray)/sizeof(singleNumberArray[0]));
+    assert(singleNumber == 1);
+
+    // Two single numbers
+    int twoSingleNumberArray[] = {1,2,3,3,4,4,5,5};
+    vector<int> resultSingleNumbers = get2SingleNumbers(twoSingleNumberArray, sizeof(twoSingleNumberArray)/ sizeof(twoSingleNumberArray[0]));
+    cout << endl;
+    for (auto i : resultSingleNumbers) {
+        cout << i << " , " << endl;
+    }
+
+    // Single number 2
+    int singleNumberArray2[] = {2,2,2,3,4,4,4};
+    int singleNumber2 = getSingleNumber2(singleNumberArray2, sizeof(singleNumberArray2)/sizeof(singleNumberArray2[0]));
+    assert(singleNumber2 == 3);
+}
+*/
