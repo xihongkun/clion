@@ -315,6 +315,7 @@ bool isSymmetric(TreeNode *root) {
     return isSymmetric(root->left, root->right);
 }
 
+/*
 int main(){
     TreeNode *root = new TreeNode(1);
     TreeNode *layer2Left = new TreeNode(4);
@@ -380,3 +381,4 @@ int main(){
     bool ifSameTree = isSameTree(root, root);
     assert(ifSameTree);
 }
+*/
