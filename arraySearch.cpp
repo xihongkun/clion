@@ -29,6 +29,34 @@ int binarySearch(const int A[], int n, int value){
     return -1;
 }
 
+/* Search in rotated Sorted Array
+ * Example, [0,1,2,4,5,6,7] might be rotated to [4,5,6,7,0,1,2]. If found return index, otherwise return -1.
+ * Assume there is no duplicates in array.
+ * 二分查找.
+ */
+int searchRotated(int A[], int n, int target) {
+    int first = 0, last = n - 1;
+
+    while (first <= last) {
+        int mid = first + (last - first) / 2;
+        if (A[mid] == target) return mid;
+
+        if (A[first] < A[mid]) {    //[first, mid]是有序区
+            if (target >= A[first] && target <= A[mid])
+                last = mid;
+            else
+                first = mid + 1;
+        } else {                    // [mid, last]是有序区
+            if (target >= A[mid] && target <= A[last])
+                first = mid;
+            else
+                last = mid - 1;
+        }
+    }
+    return -1;
+}
+
+
 /* 数字在排序数组中出现的次数
  * 如：输入{1,2,3,3,3,3,4,5}和数字3，输出4
  */
@@ -111,6 +139,101 @@ int getNumberSameAsIndex(const int A[], int n) {
     return -1;
 }
 
+/* Find kth largest element in array.
+ */
+int partition(vector<int> &nums, int low, int high) {
+    int pivot = nums[low];
+    int i = low, j = high;
+
+    while (i < j) {
+        while (i < j && nums[j] <= pivot) j--;   //从右往左找比pivot大的，换到左边
+        nums[i] = nums[j];
+        while (i < j && nums[i] >= pivot) i++;   //从左往右找比pivot小的，换到右边
+        nums[j] = nums[i];
+    }
+    // 此时i=j, 填充pivot
+    nums[i] = pivot;
+    return i;
+}
+
+int select (vector<int> &nums, int low, int high, int k) {
+    if (low == high) return nums[low];
+
+    int pos = partition(nums, low, high);
+    if (pos == k - 1) return nums[pos];
+    if (pos > k - 1) return select(nums, low, pos - 1, k);
+    if (pos < k - 1) return select(nums, pos + 1, high, k);
+}
+
+int findKthLargest(vector<int>& nums, int k) {
+    return select(nums, 0, nums.size() - 1, k);
+}
+
+/* Single Number. 一个数组中，每个元素都出现偶数次，except one. Find the single one.
+ * 思路： 用异或的方法.
+ */
+int getSingleNumber(int A[], int n) {
+    int x = 0;
+    for (int i = 0; i < n; i++) {
+        x ^= A[i];
+    }
+    return x;
+}
+
+/* Get 2 Single Numbers. 找出出现次数为一次的两个数
+ * 思路： 先计算异或结果。然后根据结果中第一个1比特位的index，把数组划分为2部分。在每个部分中分别找出single number
+ */
+vector<int> get2SingleNumbers(int A[], int n) {
+    int x = 0;
+    for (int i = 0; i < n; i++) {
+        x ^= A[i];
+    }
+
+    int size = sizeof(int) * 8;
+    int index = 0; //记录首个1 bit出现的index
+    for (; index < size; index++) {
+        if ((x >> index) & 1) break;
+    }
+
+    int num1 = 0, num2 = 0; //按照index位置是否为1， 把原数组分为两部分
+    for (int i = 0; i < n; i++) {
+        if ((A[i] >> index) & 1) {
+            num1 ^= A[i];
+        } else {
+            num2 ^= A[i];
+        }
+    }
+    vector<int> result;
+    result.push_back(num1);
+    result.push_back(num2);
+    return result;
+}
+
+/* Single Number II
+ * Given an array of integers, every element appears three times except for one. Find that single one.
+ */
+int getSingleNumber2(int A[], int n) {
+    int size = sizeof(int) * 8; // 存放int的每一位运算结果
+    int W[size];
+    fill_n(&W[0], size, 0);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < size; j++) {
+            W[j] += (A[i] >> j) & 1;
+        }
+    }
+    for (int j = 0; j < size; j++) {
+        W[j] %= 3;
+    }
+
+    int result = 0;
+    for (int j = 0; j < size; j++) {
+        result += (W[j] << j);
+    }
+
+    return result;
+}
+
 /*
 int main(){
     // 二分查找
@@ -119,6 +242,38 @@ int main(){
     int index = binarySearch(sortedArray, size, target);
 
     cout << "Index of target " << target << " is " << index << endl;
+
+    // Search in rotated sorted Array
+    int A[] = {4,5,6,7,0,1,2};
+    int targetArray[4] = {5, 7, 2, 8};
+    int indexResult[4];
+    for (int i = 0; i < 4; i++) {
+        indexResult[i] = searchRotated(A, 7, targetArray[i]);
+    }
+    assert(indexResult[0] == 1 && indexResult[1] == 3 && indexResult[2] == 6 && indexResult[3] == -1);
+
+    // Kth largest
+    vector<int> testArray = {9,3,2,4,8};
+    int thirdLargest = findKthLargest(testArray, 3);
+    assert(thirdLargest == 4);
+
+    //Single Number
+    int singleNumberArray[] = {1,2,2,3,3,4,4,4,4};
+    int singleNumber = getSingleNumber(singleNumberArray, sizeof(singleNumberArray)/sizeof(singleNumberArray[0]));
+    assert(singleNumber == 1);
+
+    // Two single numbers
+    int twoSingleNumberArray[] = {1,2,3,3,4,4,5,5};
+    vector<int> resultSingleNumbers = get2SingleNumbers(twoSingleNumberArray, sizeof(twoSingleNumberArray)/ sizeof(twoSingleNumberArray[0]));
+    cout << endl;
+    for (auto i : resultSingleNumbers) {
+        cout << i << " , " << endl;
+    }
+
+    // Single number 2
+    int singleNumberArray2[] = {2,2,2,3,4,4,4};
+    int singleNumber2 = getSingleNumber2(singleNumberArray2, sizeof(singleNumberArray2)/sizeof(singleNumberArray2[0]));
+    assert(singleNumber2 == 3);
 
     //数字在排序数组中出现次数
     int A[] = {1,2,3,3,3,3,4,5}, length = 8;
