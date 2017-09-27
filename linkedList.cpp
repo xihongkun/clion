@@ -36,7 +36,8 @@ void iterateLinkedList(ListNode *head){
     }
 }
 
-
+// 1. 从尾到头打印链表 -- 使用栈。依次入栈，然后弹出并打印。
+// 2.
 // 反转链表
 ListNode* reverseList(ListNode *head) {
     if (head == nullptr || head->next == nullptr) return head;

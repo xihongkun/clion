@@ -12,7 +12,8 @@ struct TreeNode{
     int val;
     TreeNode *left;
     TreeNode *right;
-    TreeNode(int x): val(x), left(nullptr), right(nullptr) {}
+    TreeNode *parent;
+    TreeNode(int x): val(x), left(nullptr), right(nullptr), parent(nullptr) {}
 };
 
 void visit(TreeNode *p){
@@ -200,8 +201,8 @@ TreeNode *buildTree(vector<int> &preorder, int pBegin, int pEnd, vector<int> &in
                            inorder, i + 1, iEnd);
 
     return cur;
-
 }
+
 TreeNode *buildTree(vector<int> &preorder, vector<int> &inorder) {
     int n = preorder.size();
     return buildTree(preorder, 0 , n - 1, inorder, 0, n - 1);
@@ -315,25 +316,100 @@ bool isSymmetric(TreeNode *root) {
     return isSymmetric(root->left, root->right);
 }
 
+/* 求二叉树的镜像, 要求原地置换.
+ */
+void getMirrorTree(TreeNode *root) {
+    if (root == nullptr) return;
+    if (root->left == nullptr && root->right == nullptr) return;
+
+    // 交换root的左右子节点
+    TreeNode *pTemp = root->left;
+    root->left = root->right;
+    root->right = pTemp;
+
+    getMirrorTree(root->left);
+    getMirrorTree(root->right);
+}
+
+/* 求二叉树中序序列的下一个节点. 树中的节点除了有左右子节点指针外，还有一个指向父节点的指针
+ * 思路：1. 如果当前节点有右子树，则下一个节点就是其右子树的最左节点。
+ *      2. 否则：
+ *         2.1 如果当前节点是它的父节点的左子树，则下一个节点是父节点
+ *         2.2 如果当前节点是它的父节点的右子树，则往上走，直到找到的节点是其父节点的左子树。
+ */
+
+TreeNode *nextNode(TreeNode *node) {
+    if (node == nullptr) return nullptr;
+    TreeNode *pNext = nullptr;
+
+    if (node->right != nullptr) {
+        TreeNode *pTemp = node->right;
+        while (pTemp->left) pTemp = pTemp->left;
+        pNext = pTemp;
+    } else if (node->parent != nullptr) {
+        if (node == node->parent->left)  pNext = node->right;
+        else {
+            while (node->parent != nullptr && node == node->parent->right) {
+                node = node->parent;
+            }
+            pNext = node->parent;
+        }
+    }
+    return pNext;
+}
+
+/* 和为某一值的所有路径. root-leaf !!!!
+ */
+void dfsPathSum(TreeNode *node, vector<int> &path, vector<vector<int>> &result, int gap) {
+    if (node == nullptr) return;
+
+    path.push_back(node->val);
+    if (node->left == nullptr && node->right == nullptr) {  // leaf
+        if (gap == node->val) {
+            result.push_back(path);
+            //return;   注意：这里不能return。 因为这里已经在扩展状态的代码中了，return会导致不能恢复状态。
+            // 通常需要return的时候，是在递归函数开始的时刻，判断是否可以收敛。因为这个时候还没有开始扩展状态，所以可以直接return
+        }
+    }
+    dfsPathSum(node->left, path, result, gap - node->val);
+    dfsPathSum(node->right, path, result, gap - node->val);
+    path.pop_back();
+}
+
+vector<vector<int>> pathSum(TreeNode *root, int target) {
+    vector<vector<int>> result;
+    vector<int> path;
+
+    dfsPathSum(root, path, result, target);
+    return result;
+}
+
+/* Path Sum -- Given a binary tree and a sum, determine if the tree has a root-to-leaf path such that adding up all the
+ * values along the path equals the given sum.
+ */
+bool hasPathSum(TreeNode *root, int sum) {
+    if (root == nullptr) return false;
+    if (root->left == nullptr && root->right == nullptr) {  // leaf
+        return sum == root->val;
+    }
+    return hasPathSum(root->left, sum - root->val) || hasPathSum(root->right, sum - root->val);
+}
+
 /*
 int main(){
-    TreeNode *root = new TreeNode(1);
-    TreeNode *layer2Left = new TreeNode(4);
-    TreeNode *layer2Right = new TreeNode(3);
-    TreeNode *layer3First = new TreeNode(2);
-    TreeNode *layer3Second = new TreeNode(5);
-    TreeNode *layer3Third = new TreeNode(7);
-    TreeNode *layer4First = new TreeNode(8);
-    TreeNode *layer4Second = new TreeNode(10);
+    //重建二叉树
+    vector<int> preorder = {1,4,2,8,5,10,3,7};
+    vector<int> inorder = {8,2,4,5,10,1,7,3};
+    vector<int> postorder = {8,2,10,5,4,7,3,1};
+    TreeNode *root = buildTree(preorder, inorder);
+    cout << endl << "PostOrder New Constructed Tree from preOrder and Inorder: " << endl;
+    postOrder2(root);
 
-    root->left = layer2Left;
-    root->right = layer2Right;
-    layer2Left->left = layer3First;
-    layer2Left->right = layer3Second;
-    layer2Right->left = layer3Third;
-    layer3First->left = layer4First;
-    layer3Second->right = layer4Second;
-
+    TreeNode *rootFromInAndPostOrder = buildTreeFromInAndPostOrder(inorder, postorder);
+    cout << endl << "PreOrder New Constructed Tree from InOrder and postOrder: " << endl;
+    preOrder2(rootFromInAndPostOrder);
+    
+    
     //前序遍历 递归 [1,4,2,8,5,10,3,7]
     cout << endl << "PreOrder recursively:" << endl;
     preOrder(root);
@@ -366,19 +442,14 @@ int main(){
     cout << endl << "The depth of tree using recursive way: " << maxDepthOfBT(root) << endl;
     cout << endl << "The depth of tree using non-recursive way: " << maxDepthOfBT2(root) << endl;
 
-    //重建二叉树
-    vector<int> preorder = {1,4,2,8,5,10,3,7};
-    vector<int> inorder = {8,2,4,5,10,1,7,3};
-    vector<int> postorder = {8,2,10,5,4,7,3,1};
-    TreeNode *rootFromPreAndInorder = buildTree(preorder, inorder);
-    cout << endl << "PostOrder New Constructed Tree from preOrder and Inorder: " << endl;
-    postOrder2(rootFromPreAndInorder);
 
-    TreeNode *rootFromInAndPostOrder = buildTreeFromInAndPostOrder(inorder, postorder);
-    cout << endl << "PreOrder New Constructed Tree from InOrder and postOrder: " << endl;
-    preOrder2(rootFromInAndPostOrder);
-
-    bool ifSameTree = isSameTree(root, root);
+    //Same Tree
+    bool ifSameTree = isSameTree(root, rootFromInAndPostOrder);
     assert(ifSameTree);
+
+    //Mirror of Tree
+    getMirrorTree(root);
+    cout << endl << "PreOrder the mirrored-Tree Non-recursively:" << endl;
+    preOrder2(root);
 }
 */

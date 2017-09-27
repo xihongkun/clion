@@ -5,6 +5,8 @@
 #include <iostream>
 #include <stack>
 #include <queue>
+#include <assert.h>
+
 using namespace std;
 
 class MinStack{
@@ -125,15 +127,21 @@ void infixToPostfix(const string &infix, queue<string> &postFixQueue) {  //postF
             }
             --i;
             postFixQueue.push(to_string(n));   // int to string
-        } else if (infix[i] == '(') {   //2. 左括号直接入运算符栈
+        }
+
+        else if (infix[i] == '(') {   //2. 左括号直接入运算符栈
             opStack.push(infix[i]);
-        } else if (infix[i] == ')') {   // 3. 右括号，栈顶元素依次出栈并输出，直到( 出栈
+        }
+
+        else if (infix[i] == ')') {   // 3. 右括号，栈顶元素依次出栈并输出，直到( 出栈
             while (!opStack.empty() && opStack.top() != '(') {
                 postFixQueue.push(string(1, opStack.top()));    //char to string
                 opStack.pop();
             }
             opStack.pop(); //舍弃左括号
-        }  else { //运算符
+        }
+
+        else { //运算符
             // 4. 优先级小于等于栈顶元素，则依次出栈并输出；优先级高于栈顶元素则直接入栈。不管怎样总是将最后将当前符号入栈
             while (!opStack.empty() && priority(infix[i]) <= priority(opStack.top())) {
                 postFixQueue.push(string(1, opStack.top()));
@@ -149,14 +157,37 @@ void infixToPostfix(const string &infix, queue<string> &postFixQueue) {  //postF
     }
 }
 
+/* 用后缀表达式计算结果
+ * 输入： 上面转换成的代表后缀表达式的queue<string>
+ */
+int calculator(queue<string> &postFixQueue) {
+    stack<int> nums; //计算栈
+    while (!postFixQueue.empty()) {
+        if (postFixQueue.front()[0] >= '0' && postFixQueue.front()[0] <= '9') { //数字直接入计算栈
+            nums.push(stoi(postFixQueue.front()));
+            postFixQueue.pop();
+        } else {   //遇到字符：取栈顶的两个元素出栈，计算结果入栈
+            int i1 = nums.top(); nums.pop();
+            int i2 = nums.top(); nums.pop();
 
+            char op = postFixQueue.front()[0]; postFixQueue.pop(); //存储的是string，取第一个元素即为char
+            if (op == '+') nums.push(i2 + i1);
+            if (op == '-') nums.push(i2 - i1);
+            if (op == '*') nums.push(i2 * i1);
+            if (op == '/') nums.push(i2 / i1);
+        }
+    }
+
+    return nums.top();
+}
+
+/*
 int main() {
     string x = "9+ (3 - 1)*3+10/2";
     queue<string> postFixQueue;
     infixToPostfix(x, postFixQueue);
-    while(!postFixQueue.empty()) {
-        cout << postFixQueue.front() << " ";
-        postFixQueue.pop();
-    }
 
+    int result = calculator(postFixQueue);
+    assert(result == 20);
 }
+*/

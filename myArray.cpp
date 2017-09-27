@@ -261,7 +261,32 @@ int getSingleNumber2(int A[], int n) {
     return result;
 }
 
-/*
+/* 顺时针打印矩阵
+ */
+vector<int> clockWiseOrder(vector<vector<int>> &matrix) {
+    vector<int> result;
+    if (matrix.empty()) return result;
+
+    int beginX = 0, beginY = 0;
+    int endX = matrix[0].size() - 1, endY = matrix.size() - 1;
+
+    while (true) {
+        for (int j = beginX; j <= endX; j++) result.push_back(matrix[beginY][j]); // 从左至右
+        if (++beginY > endY) break;
+
+        for (int i = beginY; i <= endY; i++) result.push_back(matrix[i][endX]);  // 从上至下
+        if (--endX < beginX) break;
+
+        for (int j = endX; j >= beginX; j--) result.push_back(matrix[endY][j]);  // 从右至左
+        if (--endY < beginY) break;
+
+        for (int i = endY; i >= beginY; i--) result.push_back(matrix[i][beginX]);  // 从下至上
+        if (++beginX > endX) break;
+    }
+    return result;
+}
+
+
 int main(){
     // remove elements.
     int elementArray[] = {1,2,1,1,4,5,6,2};
@@ -321,5 +346,11 @@ int main(){
     int singleNumberArray2[] = {2,2,2,3,4,4,4};
     int singleNumber2 = getSingleNumber2(singleNumberArray2, sizeof(singleNumberArray2)/sizeof(singleNumberArray2[0]));
     assert(singleNumber2 == 3);
+
+    // 顺时针打印矩阵
+    vector<vector<int>> matrix= {{1,2,3,4}, {5,6,7,8}, {9,10,11,12}, {13,14,15,16}};
+    vector<int> matrixClockwiseResult = clockWiseOrder(matrix);
+    for (auto i : matrixClockwiseResult) cout << i << ",";
+    cout << endl;
 }
-*/
+
