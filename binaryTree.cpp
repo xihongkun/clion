@@ -270,6 +270,40 @@ bool isValidBST(TreeNode *root) {
     return isValidBST(root, INT32_MIN, INT32_MAX);
 }
 
+/* 验证一个数组是否为一个二叉搜索树的后序遍历序列. 假设数组中没有重复值.
+ * 例如： {5,7,6,9,11,10,8}是一个BST的后序序列；{7,4,6,5}则不是
+ */
+bool isSequenceOfBST(vector<int> &A, int start, int end) {
+    if (start == end) return true;
+
+    int root = A[end];
+    // 1. 左子树的节点小于根节点 (注意：如果结果i==start, 则没有左子树, 如果i==end, 则没有右子树!!!)
+    int i = start;
+    for (; i < end; i++) {
+        if (A[i] > root) break;
+    }
+
+    //2. 右子树的节点大于根节点. 但是如果有小于root的节点，立刻剪枝返回false
+    int j = i;
+    for (; j < end; j++) {
+        if (A[j] < root) return false;
+    }
+
+    bool left = true;
+    if (i > start)  //如果有左子树
+        left = isSequenceOfBST(A, start, i - 1);
+
+    bool right = true;
+    if (i < end)    // 如果有右子树
+        right = isSequenceOfBST(A, i, end - 1);
+
+    return  (left && right);
+}
+
+bool isSequenceOfBST(vector<int> A) {
+    return  isSequenceOfBST(A, 0, A.size() - 1);
+}
+
 /* Convert Sorted Array to Binary Search Tree.
  * Given an array where elements are sorted in ascending order, convert it to a height balanced BST.
  */
@@ -296,6 +330,20 @@ bool isSameTree(TreeNode *p, TreeNode *q) {
     return (p->val == q->val)
            && isSameTree(p->left, q->left)
            && isSameTree(p->right, q->right);
+}
+
+/* Subtree. -- A tree T2 is a subtree of Tl if there exists a node n in Tl such that the subtree of n is identical to T2.
+ * That is, if you cut off the tree at node n, the two trees would be identical.
+ * 思路： 复用isSameTree的代码。/
+ */
+bool isSubtree(TreeNode *root1, TreeNode *root2) {
+    if (root2 == nullptr) return true; //空树是任意树的子树
+    if (root1 == nullptr) return false; //任何非空树不是空树的子树
+    if (root1->val == root2->val) {
+        if (isSameTree(root1, root2)) return true;
+    }
+    return isSubtree(root1->left, root2) || isSubtree(root1->right, root2);
+
 }
 
 /* Symmetric Tree -- 对称二叉树
@@ -405,34 +453,9 @@ int main(){
     cout << endl << "PostOrder New Constructed Tree from preOrder and Inorder: " << endl;
     postOrder2(root);
 
-    TreeNode *rootFromInAndPostOrder = buildTreeFromInAndPostOrder(inorder, postorder);
+    TreeNode *root2 = buildTreeFromInAndPostOrder(inorder, postorder);
     cout << endl << "PreOrder New Constructed Tree from InOrder and postOrder: " << endl;
-    preOrder2(rootFromInAndPostOrder);
-    
-    
-    //前序遍历 递归 [1,4,2,8,5,10,3,7]
-    cout << endl << "PreOrder recursively:" << endl;
-    preOrder(root);
-
-    //前序遍历 非递归
-    cout << endl << "PreOrder Non-recursively:" << endl;
-    preOrder2(root);
-
-    //中序遍历，递归 [8,2,4,5,10,1,7,3]
-    cout << endl << "InOrder recursively:" << endl;
-    inOrder(root);
-
-    //中序遍历，非递归
-    cout << endl << "InOrder Non-recursively:" << endl;
-    inOrder2(root);
-
-    //后序遍历，递归
-    cout << endl << "PostOrder Recursively: " << endl;
-    postOrder(root);
-
-    //后序遍历，非递归
-    cout << endl << "PostOrder Non-recursively: " << endl;
-    postOrder2(root);
+    preOrder2(root2);
 
     //层序遍历， 用队列实现
     cout << endl << "Level Order: " << endl;
@@ -442,14 +465,18 @@ int main(){
     cout << endl << "The depth of tree using recursive way: " << maxDepthOfBT(root) << endl;
     cout << endl << "The depth of tree using non-recursive way: " << maxDepthOfBT2(root) << endl;
 
-
     //Same Tree
-    bool ifSameTree = isSameTree(root, rootFromInAndPostOrder);
+    bool ifSameTree = isSameTree(root, root2);
     assert(ifSameTree);
 
     //Mirror of Tree
     getMirrorTree(root);
     cout << endl << "PreOrder the mirrored-Tree Non-recursively:" << endl;
     preOrder2(root);
+
+    // 验证一个序列是否为一棵BST的后序序列
+    vector<int> A1 = {5,7,6,9,11,10,8}, A2 = {7,4,6,5};
+    bool isA1BST = isSequenceOfBST(A1), isA2BST = isSequenceOfBST(A2);
+    assert(isA1BST && !isA2BST);
 }
 */

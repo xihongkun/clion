@@ -165,7 +165,7 @@ vector<int> clockWiseOrder(vector<vector<int>> &matrix) {
     return result;
 }
 
-
+/*
 int main(){
     // remove elements.
     int elementArray[] = {1,2,1,1,4,5,6,2};
@@ -197,7 +197,9 @@ int main(){
     // 顺时针打印矩阵
     vector<vector<int>> matrix= {{1,2,3,4}, {5,6,7,8}, {9,10,11,12}, {13,14,15,16}};
     vector<int> matrixClockwiseResult = clockWiseOrder(matrix);
+    cout << endl;
     for (auto i : matrixClockwiseResult) cout << i << ",";
     cout << endl;
 }
+*/
 

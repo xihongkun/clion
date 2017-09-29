@@ -82,7 +82,7 @@ void heapSort(int A[], int n){
 
 // -------------------------------------------快速排序-------------------------------------------------------------------//
 //快速排序. 将数组分区
-int getPartition(int A[], int low, int high){
+int partition(int A[], int low, int high){   //partition函数的复杂度为O(n)
     int pivot = A[low];
     int i = low, j = high;
 
@@ -100,7 +100,7 @@ int getPartition(int A[], int low, int high){
 //快速排序算法
 void quickSort(int A[], int low, int high){
     if (low < high){
-        int pivotIndex = getPartition(A, low, high);
+        int pivotIndex = partition(A, low, high);
         quickSort(A, low, pivotIndex-1);
         quickSort(A, pivotIndex+1, high);
     }

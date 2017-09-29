@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 #include <assert.h>
+#include <queue>
+#include <algorithm>
 
 using namespace std;
 
@@ -140,10 +142,11 @@ int getNumberSameAsIndex(const int A[], int n) {
 }
 
 /* Find kth largest element in array.
+ * 方法1：用快排里的partition方法
  */
-int partition(vector<int> &nums, int low, int high) {
-    int pivot = nums[low];
-    int i = low, j = high;
+int partition(vector<int> &nums, int start, int end) {  //partition函数的复杂度为O(n)
+    int pivot = nums[start];
+    int i = start, j = end;
 
     while (i < j) {
         while (i < j && nums[j] <= pivot) j--;   //从右往左找比pivot大的，换到左边
@@ -156,18 +159,62 @@ int partition(vector<int> &nums, int low, int high) {
     return i;
 }
 
-int select (vector<int> &nums, int low, int high, int k) {
-    if (low == high) return nums[low];
+int findKthLargest(vector<int> &nums, int k) {
+    int start = 0, end = nums.size() - 1;
 
-    int pos = partition(nums, low, high);
-    if (pos == k - 1) return nums[pos];
-    if (pos > k - 1) return select(nums, low, pos - 1, k);
-    if (pos < k - 1) return select(nums, pos + 1, high, k);
+    int index = partition(nums, 0, end);
+
+    while (index != k - 1) {
+        if (index > k - 1) {
+            end = index - 1;
+            index = partition(nums, start, end);
+        } else {
+            start = index + 1;
+            index = partition(nums, start, end);
+        }
+    }
+    return nums[index];
 }
 
-int findKthLargest(vector<int>& nums, int k) {
-    return select(nums, 0, nums.size() - 1, k);
+/* /* Find kth largest element in array.
+ * 方法2：最小堆(因为是最小堆，所以每次更新的时候都能把最小的元素pop出来;最后队头的元素是K个元素里最小的，也就是第K大的元素)
+ */
+int findKthLargest2(vector<int> &nums, int k) {
+    priority_queue<int, vector<int>, greater<int>> q;
+    int i = 0;
+    for (; i < k; i++) {
+        q.push(nums[i]);
+    }
+
+    for (; i < nums.size(); i++) {
+        if (nums[i] > q.top()) {
+            q.pop();
+            q.push(nums[i]);
+        }
+    }
+    return q.top();
 }
+
+/* 数组中出现次数超过一半的数字
+ * 思路： 如果该数组出现次数超过一半，那么排序后位于数组中间的数字一定就是该数字。
+ */
+int getMoreThanHalf(vector<int> nums) {
+    int start = 0, end = nums.size() - 1;
+    int middle = start + (end - start) / 2;
+
+    int index = partition(nums, start, end);
+    while (index != middle) {
+        if (index > middle) {
+            end = index - 1;
+            index = partition(nums, start, end);
+        } else {
+            start = index + 1;
+            index = partition(nums, start, end);
+        }
+    }
+    return nums[index];
+}
+
 
 /* Single Number. 一个数组中，每个元素都出现偶数次，except one. Find the single one.
  * 思路： 用异或的方法.
@@ -234,7 +281,7 @@ int getSingleNumber2(int A[], int n) {
     return result;
 }
 
-/*
+
 int main(){
     // 二分查找
     int size = sizeof(sortedArray)/sizeof(sortedArray[0]);
@@ -253,9 +300,15 @@ int main(){
     assert(indexResult[0] == 1 && indexResult[1] == 3 && indexResult[2] == 6 && indexResult[3] == -1);
 
     // Kth largest
-    vector<int> testArray = {9,3,2,4,8};
+    vector<int> testArray = {9,3,2,4,8,0,1};
     int thirdLargest = findKthLargest(testArray, 3);
-    assert(thirdLargest == 4);
+    int thirdLargest2 = findKthLargest2(testArray, 3);
+    assert(thirdLargest == 4 && thirdLargest2 == 4);
+
+    // 出现次数超过一半的数字
+    vector<int> moreThanHalfArray = {4,5,2,4,2,4,4,9,4};
+    int moreThanHalfInt = getMoreThanHalf(moreThanHalfArray);
+    assert(moreThanHalfInt == 4);
 
     //Single Number
     int singleNumberArray[] = {1,2,2,3,3,4,4,4,4};
@@ -276,9 +329,9 @@ int main(){
     assert(singleNumber2 == 3);
 
     //数字在排序数组中出现次数
-    int A[] = {1,2,3,3,3,3,4,5}, length = 8;
-    int number3 = getNumberOfK(A, length, 3);
-    int number5 = getNumberOfK(A, length, 5);
+    int A1[] = {1,2,3,3,3,3,4,5}, length = 8;
+    int number3 = getNumberOfK(A1, length, 3);
+    int number5 = getNumberOfK(A1, length, 5);
     assert(number3 == 4 && number5 == 1);
 
     //缺失的数字
@@ -291,4 +344,3 @@ int main(){
     int number = getNumberSameAsIndex(C, 5);
     assert(number == 3);
 }
-*/
