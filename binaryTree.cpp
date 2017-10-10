@@ -161,7 +161,6 @@ int maxDepthOfBT2(TreeNode *root) {
     while (!que.empty()) {
         p = que.front();
         que.pop();
-        visit(p); //顺便打印
         curLayerNum--;
         if (p->left) {
             que.push(p->left);
@@ -172,7 +171,6 @@ int maxDepthOfBT2(TreeNode *root) {
         }
 
         if (curLayerNum == 0) {
-            cout << endl; //每一层遍历完后，换行输出
             depth++;
             curLayerNum = que.size();
         }
@@ -187,8 +185,8 @@ TreeNode *buildTree(vector<int> &preorder, int pBegin, int pEnd, vector<int> &in
     if (pBegin > pEnd || iBegin > iEnd)  //递归结束条件
         return nullptr;
 
-    int i = 0;
-    while (i < inorder.size() && inorder[i] != preorder[pBegin]) i++;
+    int i = iBegin;
+    while (i <= iEnd && inorder[i] != preorder[pBegin]) i++;
 
     // 左子树的长度. 据此长度划分preorder序列，找到新的pBegin和pEnd
     int leftLength = i - iBegin; //[iBegin, i -1]
@@ -217,8 +215,8 @@ TreeNode *buildTreeFromInAndPostOrder(vector<int> &inorder, int inBegin, int inE
     if (inBegin > inEnd || postBegin > postEnd) return nullptr;
 
     // 在中序序列中寻找根的位置. 后序序列的最后一个元素是树的根
-    int i = 0;
-    while (i < inorder.size() && inorder[i] != postorder[postEnd]) i++;
+    int i = inBegin;
+    while (i <= inEnd && inorder[i] != postorder[postEnd]) i++;
 
     int leftLength = i - inBegin;
     int rightLength = inEnd - i;
@@ -311,8 +309,8 @@ TreeNode *sortedArrayToBST(vector<int> &num, int start, int end) {
     if (start > end) return nullptr;     // Start > end 时，不再构建cur及左右子树，直接返回nullptr. nullptr可以在长一层作为左右子树.
     int mid = (start + end) / 2;         // 这是二叉树的递归构建中常用的技巧.
     TreeNode *cur = new TreeNode(num[mid]);    //自顶向下构建 -- 先构建parent节点,然后递归构建左右子树.
-    cur->left = sortedArrayToBST(num, start, end - 1);
-    cur->right = sortedArrayToBST(num, end + 1, end);
+    cur->left = sortedArrayToBST(num, start, mid - 1);
+    cur->right = sortedArrayToBST(num, mid + 1, end);
 
     return cur;
 }
@@ -395,7 +393,7 @@ TreeNode *nextNode(TreeNode *node) {
         while (pTemp->left) pTemp = pTemp->left;
         pNext = pTemp;
     } else if (node->parent != nullptr) {
-        if (node == node->parent->left)  pNext = node->right;
+        if (node == node->parent->left)  pNext = node->parent;
         else {
             while (node->parent != nullptr && node == node->parent->right) {
                 node = node->parent;
