@@ -9,6 +9,36 @@
 
 using namespace std;
 
+/* 其他问题：
+ * 1. longest common subsequence -- 求两个序列的最长子序列长度
+ * 状态转移方程： 设f[i,j] 表示X[0,i] 和Y[0,j]的最长子序列长度，则：f[i,j] =
+ * 如果X[i] == Y[j], f[i,j] = f[i-1, j-1] + 1
+ * 如果X[i] != Y[j], f[i,j] = max(f[i-1, j], f[i, j-1])
+ */
+
+/* 最长上升子序列的长度
+ * 例如(1, 7, 3, 5, 9, 4, 8) 有几个上升子序列 如(1, 7), (3, 4, 8)等等。最长上升子序列为(1,3,5,8)
+ * 思路： 设f[i]表示以A[i]结尾的最长上升子序列长度，则f[i]的状态转移方程为：
+ * f[0] = 1;
+ * f[i] = max{f[j]} + 1 ; 对于0<j<i 且A[j] < A[i]
+ */
+int longestIncreasingSubSequenseLen(vector<int> nums) {
+    int m = nums.size();
+    int f[m];
+    fill_n(&f[0], m, 0);
+
+    f[0] = 1;
+    for (int i = 1; i < m; i++) {
+        int max = 0;
+        for (int j = 0; j < i; j++) {
+            if (nums[j] < nums[i] && nums[j] > max) max = f[j];
+        }
+        f[i] = max + 1;
+    }
+    return f[m-1];
+}
+
+
 // 三角矩阵求最小路径和。每次都只能移动至下一行的相邻元素
 // 状态转移方程： f[i][j]表示从位置[i,j] 出发到bottom的最小路径和，则f[i][j] = min (f[i+1][j], f[i+i][j+1]) + S[i][j]
 int minTotal(vector<vector<int>> triangle) {
@@ -344,8 +374,13 @@ int uniquePathsWithObstacles(vector<vector<int>> &obstacleGrid) {
     return f[m-1][n-1];
 }
 
-/*
+
 int main() {
+    //最长上升子序列的长度
+    vector<int> se = {1, 7, 3, 5, 9, 4, 8};
+    int increasingLen = longestIncreasingSubSequenseLen(se);
+    assert(increasingLen == 4);
+
     // minimum path sum from top to bottom
     vector<vector<int>> v = {{2}, {3,4}, {6,5,7}, {4,1,8,3}};
     cout << endl << "Minimum path sum is " << minTotal(v) << endl;
@@ -403,4 +438,3 @@ int main() {
     int paths = uniquePaths(3, 3); //3*3的矩阵应该有6条路径
     assert(paths == 6);
 }
-*/
