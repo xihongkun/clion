@@ -196,7 +196,6 @@ void dfsPalindrome(string &s, vector<vector<bool>> &f, vector<string> &path, vec
     }
 
     for (int i = start; i < s.size(); i++) { //理解：这里i不会每次都递归。只有符合f[start][i]的i才会进入递归。
-        cout << endl << "start: " << start << ", i: " << i << endl;
         if (f[start][i]) {
             path.push_back(s.substr(start, i-start+1));
             dfsPalindrome(s, f, path, result, i+1);

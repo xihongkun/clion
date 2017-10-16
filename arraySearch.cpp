@@ -281,7 +281,7 @@ int getSingleNumber2(int A[], int n) {
     return result;
 }
 
-
+/*
 int main(){
     // 二分查找
     int size = sizeof(sortedArray)/sizeof(sortedArray[0]);
@@ -344,3 +344,4 @@ int main(){
     int number = getNumberSameAsIndex(C, 5);
     assert(number == 3);
 }
+*/

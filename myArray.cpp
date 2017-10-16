@@ -10,6 +10,41 @@
 
 using namespace std;
 
+/* Median of Two Sorted Arrays
+ * 中位数的定义是，如果一个集合有奇数2k + 1个元素，那排序后第k个数就是中位数，如果有偶数2k个元素，那么中位数的定义为排序后第k个数和第k+1个数的平均值。
+ * 思路：假设A和B的长度都大于k/2，那么我们将A的第k/2个元素(即A[k/2-1])和B的第k/2个元素比较，有以下三种情况：
+ * 如果A[k/2 - 1] == B[k/2 - 1]， 那么A[k/2 - 1] 即所求的第k大的元素
+ * 如果A[k/2 - 1] < B[k/2 -1], 那么A的前k/2个元素可以放心的删除(A[0], A[1]...A[k/2-1]肯定在top-K的范围内)
+ * 如果A[k/2 - 1] > B[k/2 -1], 那么B的前k/2个元素可以放心的删除
+ */
+int findKth(int A[], int m, int B[], int n, int k) {
+    //always assume that m is equal or smaller than n
+    // 如果 m>n, 将两个数组互换即可
+    if (m > n) return findKth(B, n, A, m, k);
+    // 递归终止条件1： 如果m==0, 返回 B[k-1]
+    if (m == 0) return B[k-1];
+    // 递归终止条件2: 如果k==1, 返回min(A[0], B[0])
+    if (k == 1) return min(A[0], B[0]);
+
+    int pa = min(k/2, m), pb = k - pa; //从A中选pa个元素的话，需要从B中选k-pa个元素
+    if (A[pa - 1] == B[pb - 1]) return A[pa -1];
+    if (A[pa - 1] < B[pb - 1]) {
+        return findKth(A + pa, m - pa, B, n, k - pa); //注意： 删除A的前pa个元素后, 递归查找第k-pa大的元素
+    } else {
+        return findKth(A, m, B + pb, n - pb, k - pb);
+    }
+}
+
+double findMedianSortedArrays(int A[], int m, int B[], int n) {
+    int total = m + n;
+    if (total & 1) {
+        return findKth(A, m, B, n, total/2 + 1);
+    } else {
+        return (findKth(A, m, B, n, total/2) + findKth(A, m, B, n, total/2 + 1)) / 2.0;
+    }
+}
+
+
 /* Remove Element.
  * Given an array and a value, remove all instances of the value in place and return the new length.
  */
@@ -165,8 +200,18 @@ vector<int> clockWiseOrder(vector<vector<int>> &matrix) {
     return result;
 }
 
-/*
+
+
 int main(){
+    // 两个有序数组的中位数
+    int testA[] = {1,3,5,7,9}, testB[] = {2,4,6};
+    double testMedian = findMedianSortedArrays(testA, 5, testB, 3);
+    cout << "Median: " << testMedian << endl;
+
+    int testA2[] = {1,3,5,7,9}, testB2[] = {2, 4};
+    double testMedian2 = findMedianSortedArrays(testA2, 5, testB2, 2);
+    cout << "Midian 2: " << testMedian2 << endl;
+
     // remove elements.
     int elementArray[] = {1,2,1,1,4,5,6,2};
     int afterRemovedLength = removeElement(elementArray, 8, 1);
@@ -201,5 +246,5 @@ int main(){
     for (auto i : matrixClockwiseResult) cout << i << ",";
     cout << endl;
 }
-*/
+
 
