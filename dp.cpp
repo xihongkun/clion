@@ -16,6 +16,31 @@ using namespace std;
  * 如果X[i] != Y[j], f[i,j] = max(f[i-1, j], f[i, j-1])
  */
 
+/* 0-1 背包问题
+ * 有N种物品，第i种物品的重量为wi，价值为vi. 背包能承受的最大重量为W. 将哪些物品放入背包可以使重量不超过背包的承受重量，且价值最大?
+ * 设状态f[i][j]表示将前i个物品(0,..i-1)放入容量为j的背包，所能获得的最大价值，则对于每个物品，要么放，要么不放：
+ * 不放第i-1个物品：f[i][j] = f[i-1][j]
+ * 放第i-1个物品：f[i][j] = f[i-1][j-w[i-1]] + v[i-1]
+ * @params:
+ * number: 物品种类数; W:背包承受最大重量; w: 每个物品的重量数组; v: 每个物品的价值数组
+ */
+int zeroOnePackage(int number, int W, vector<int> &w, vector<int> &v) {
+    int f[number+1][W+1];
+    fill_n(&f[0][0], (number+1)*(W+1), 0);
+
+    for (int i = 0; i <= number; i++) {
+        for (int j=0; j<=W; j++) {
+            f[i][j] = i==0 ? 0 : f[i-1][j];
+            if (i> 0 && j >= w[i-1]) {
+                int tmp = f[i-1][j-w[i-1]] + v[i-1];
+                if (tmp > f[i][j]) f[i][j] = tmp;
+            }
+        }
+
+    }
+    return f[number][W];
+}
+
 /* 最长上升子序列的长度
  * 例如(1, 7, 3, 5, 9, 4, 8) 有几个上升子序列 如(1, 7), (3, 4, 8)等等。最长上升子序列为(1,3,5,8)
  * 思路： 设f[i]表示以A[i]结尾的最长上升子序列长度，则f[i]的状态转移方程为：
@@ -374,12 +399,18 @@ int uniquePathsWithObstacles(vector<vector<int>> &obstacleGrid) {
     return f[m-1][n-1];
 }
 
-
+/*
 int main() {
     //最长上升子序列的长度
     vector<int> se = {1, 7, 3, 5, 9, 4, 8};
     int increasingLen = longestIncreasingSubSequenseLen(se);
     assert(increasingLen == 4);
+
+    // 0-1背包问题
+    vector<int> vectorW = {5,4,3,2,1}; //重量
+    vector<int> vectorV = {1,2,3,4,5};
+    int maxValue = zeroOnePackage(5, 10, vectorW, vectorV);
+    assert(maxValue==14);
 
     // minimum path sum from top to bottom
     vector<vector<int>> v = {{2}, {3,4}, {6,5,7}, {4,1,8,3}};
@@ -438,3 +469,4 @@ int main() {
     int paths = uniquePaths(3, 3); //3*3的矩阵应该有6条路径
     assert(paths == 6);
 }
+*/

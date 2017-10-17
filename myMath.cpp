@@ -9,6 +9,50 @@
 
 using namespace std;
 
+/* 字符串相乘
+ */
+vector<int> toBigint(const string &s) {   // 把string转换成vector<int>, 注意这里需要把string的字符reverse，以便后面相乘
+    size_t len = s.size();               // 例如 "123"会转换成[3,2,1]
+    vector<int> bigint(len);
+    for (size_t i = 0; i < len; i++) {
+        bigint[len - 1 - i] = s[i] - '0';
+    }
+    return bigint;
+}
+
+string toString(vector<int> data) { // 再将vector<int> 转换回string
+    string result = "";
+    reverse(data.begin(), data.end());
+    size_t len = data.size();
+    int i = 0;
+    for (; i < len; i++) {
+        if (data[i] != 0) break;
+    }
+
+    for (; i < len; i++) {
+        result += (data[i] + '0');
+    }
+    return result;
+}
+
+string multiply(const string &num1, const string &num2) {
+
+    vector<int> bigint1 = toBigint(num1), bigint2 = toBigint(num2);
+    size_t len1 = bigint1.size(), len2 = bigint2.size();
+    vector<int> data(len1 + len2); // 用一个数组存储相乘后的结果，这样不会溢出
+
+    for (size_t i = 0; i < len1; i++) {
+        for (size_t j = 0; j < len2; j++) {
+            data[i + j] += bigint1[i] * bigint2[j];
+            data[i + j + 1] += data[i + j] / 10;
+            data[i + j] %= 10;
+        }
+    }
+
+    string res = toString(data);
+    return res;
+}
+
 int reverseInt(int x) {
     long long num = 0; // 旋转后可能溢出，因此设置临时变量时应该为long long，然后判断并处理。
     while (x != 0) {
@@ -109,12 +153,15 @@ int minMeetingRooms(vector<Interval> &intervals) {
     return q.size();
 }
 
-/*
+
 int main() {
     // reverse integer
     int a = 12345;
     cout << endl << "After reversing " << a << ": " << reverseInt(a) << endl;
 
+    // 字符串相乘
+    string stringA = "123", stringB = "456";
+    cout << endl << "Multiply strings: " << multiply(stringA, stringB) << endl;
     // palindrome number
     int palindromeInt = 123454321;
     if (isPalindrome(palindromeInt))
@@ -141,4 +188,3 @@ int main() {
         cout << endl << "Can attend all meetings" << endl;
 
 }
-*/
