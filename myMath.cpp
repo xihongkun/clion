@@ -11,16 +11,17 @@ using namespace std;
 
 /* 字符串相乘
  */
-vector<int> toBigint(const string &s) {   // 把string转换成vector<int>, 注意这里需要把string的字符reverse，以便后面相乘
-    size_t len = s.size();               // 例如 "123"会转换成[3,2,1]
-    vector<int> bigint(len);
+typedef vector<short> BigInt;
+BigInt toBigint(const string &s) {   // 把string转换成vector<int>, 注意这里需要把string的字符reverse，以便后面相乘
+    size_t len = s.size();           // 例如 "123"会转换成[3,2,1]
+    BigInt bigint(len);
     for (size_t i = 0; i < len; i++) {
         bigint[len - 1 - i] = s[i] - '0';
     }
     return bigint;
 }
 
-string toString(vector<int> data) { // 再将vector<int> 转换回string
+string toString(BigInt data) { // 再将vector<int> 转换回string
     string result = "";
     reverse(data.begin(), data.end());
     size_t len = data.size();
@@ -37,9 +38,9 @@ string toString(vector<int> data) { // 再将vector<int> 转换回string
 
 string multiply(const string &num1, const string &num2) {
 
-    vector<int> bigint1 = toBigint(num1), bigint2 = toBigint(num2);
+    BigInt bigint1 = toBigint(num1), bigint2 = toBigint(num2);
     size_t len1 = bigint1.size(), len2 = bigint2.size();
-    vector<int> data(len1 + len2); // 用一个数组存储相乘后的结果，这样不会溢出
+    BigInt data(len1 + len2); // 用一个数组存储相乘后的结果，这样不会溢出
 
     for (size_t i = 0; i < len1; i++) {
         for (size_t j = 0; j < len2; j++) {
