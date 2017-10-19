@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <cmath>
 
 using namespace std;
 
@@ -54,6 +55,44 @@ string multiply(const string &num1, const string &num2) {
     return res;
 }
 
+/* https://stackoverflow.com/questions/1761626/weighted-random-numbers 加权随机算法
+ * There is a straightforward algorithm for picking an item at random, where items have individual weights:
+ * 1) calculate the sum of all the weights
+ * 2) pick a random number that is 0 or greater and is less than the sum of the weights
+ * 3) go through the items one at a time, subtracting their weight from your random number, until you get the item where the random number is less than that item's weight
+ * Pseudo-code illustrating this:
+ */
+
+  /*
+    int sum_of_weight = 0;
+    for(int i=0; i<num_choices; i++) {
+       sum_of_weight += choice_weight[i];
+    }
+    int rnd = random(sum_of_weight);
+    for(int i=0; i<num_choices; i++) {
+      if(rnd < choice_weight[i])
+        return i;
+      rnd -= choice_weight[i];
+    }
+  */
+
+// 例如： design a function rand_prob(unsigned int N, double prob[]), which returns integer i (0<=i<N) with probability prob[i]
+int rand_prob(unsigned int N, double prob[]) {
+    double total_prob = 0;
+    for (int i = 0; i < N; i++) {
+        total_prob += prob[i];
+    }
+    // 使用rand() / double(RAND_MAX) 取得0～1之间的浮点数. 再乘以total_prob， 可以获得(0-prob)之间的随机浮点数
+    double rnd = rand() / double(RAND_MAX) * total_prob;
+    for (int j = 0; j < N; j++) {
+        if (rnd <  prob[j])
+            return j;
+        rnd -= prob[j];
+    }
+}
+
+
+// 反转int
 int reverseInt(int x) {
     long long num = 0; // 旋转后可能溢出，因此设置临时变量时应该为long long，然后判断并处理。
     while (x != 0) {
@@ -64,7 +103,7 @@ int reverseInt(int x) {
     return num;
 }
 
-
+// 判断一个整数是否为回文数
 bool isPalindrome(int x) {
     if (x < 0) return false; // 负数是否能被称为回文数？
     int  divisor = 1 ;
