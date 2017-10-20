@@ -58,6 +58,45 @@ int searchRotated(int A[], int n, int target) {
     return -1;
 }
 
+/* Find Minimum in Rotated Sorted Array 寻找旋转有序数组的最小值. 假设数组中没有重复值
+ * A[start] < A[mid], 那么最小值一定在右半区间，譬如[4,5,6,7,0,1,2]，中间元素为7，7 > 4，最小元素一定在[7,0,1,2]这边，于是我们继续在这个区间查找。
+ * A[start] > A[mid] ，那么最小值一定在左半区间，譬如[7,0,1,2,4,5,6]，这件元素为2，2 < 7，我们继续在[7,0,1,2]这个区间查找。
+ * 注意： 1. 这里不要取start = mid + 1 或者 end = mid - 1, 因为如果mid元素是两个有序数组分界点的话，
+ *          取mid+1会导致二分后的数组变成单调的数组，无法再次利用循环判断。例如第一个例子里，取mid+1的话，搜索范围会定在[0,1,2].
+ *          即： 总是要保证二分后的数组还是旋转数组!!!
+ *       2. 最后结束循环时, start 指向前一个数组最后一个值，end指向后一个数组的第一个元素. 因此num[end]就是最小值
+ */
+int findMin(int A[], int n) {
+    if (A[0] < A[n - 1]) return A[0]; // 如果没有旋转
+
+    int start = 0, end = n - 1;
+    while (start != end - 1) { // 结束条件
+        int mid = start + (end - start) / 2;
+        if (A[start] < A[mid]) {
+            start = mid;
+        } else {
+            end = mid;
+        }
+    }
+    return A[end];
+}
+/* 允许重复元素存在. 如果遇到A[start] == A[end]的情况， start++即可， 因为前面还有重复值，不会出现丢失的问题。
+ * 这里在每次while循环里，都要检测if (A[start] < A[mid])，因为跟上面没有重复值的情况不同，start++不能保证每次二分后的数组还是旋转数组。
+ * */
+int findMinDup(int A[], int n) {
+    if (A[0] < A[n - 1])  return A[0];
+    int start = 0, end = n - 1;
+
+    while (start != end - 1) {
+        if (A[start] < A[end]) return A[start];  //检查二分后的数组是否已经是单调数组
+        int mid = start + (end - start) / 2;
+        if (A[start] < A[mid]) start = mid;
+        else if (A[start] > A[mid]) end = mid;
+        else start++;
+    }
+    return min(A[start], A[end]);  // 返回最小值
+}
+
 
 /* 数字在排序数组中出现的次数
  * 如：输入{1,2,3,3,3,3,4,5}和数字3，输出4
@@ -281,7 +320,7 @@ int getSingleNumber2(int A[], int n) {
     return result;
 }
 
-/*
+
 int main(){
     // 二分查找
     int size = sizeof(sortedArray)/sizeof(sortedArray[0]);
@@ -297,7 +336,18 @@ int main(){
     for (int i = 0; i < 4; i++) {
         indexResult[i] = searchRotated(A, 7, targetArray[i]);
     }
-    assert(indexResult[0] == 1 && indexResult[1] == 3 && indexResult[2] == 6 && indexResult[3] == -1);
+    // 旋转数组最小值
+    int minRotated = findMin(A, 7);
+
+    int A2[8] = {7,0,1,2,3,4,5,6};
+    int minRotated2 = findMin(A2, 8);
+
+    int Adup[5] = {1,0,1,1,1}, Adup2[5] = {1,1,1,0,1};
+    int dupMinRotate = findMinDup(Adup, 5);
+    int dupMinRotate2 = findMinDup(Adup2, 5);
+
+    assert(indexResult[0] == 1 && indexResult[1] == 3 && indexResult[2] == 6 && indexResult[3] == -1 && minRotated == 0
+           && minRotated2 == 0 && dupMinRotate == 0 && dupMinRotate2 == 0);
 
     // Kth largest
     vector<int> testArray = {9,3,2,4,8,0,1};
@@ -344,4 +394,3 @@ int main(){
     int number = getNumberSameAsIndex(C, 5);
     assert(number == 3);
 }
-*/

@@ -2,6 +2,8 @@
 // Created by xih on 2017/10/19.
 //
 #include <iostream>
+
+/*
 #include <pthread.h>
 
 using namespace std;
@@ -57,3 +59,4 @@ Singleton1* Singleton1::instance() {
     }
     return p;
 }
+*/

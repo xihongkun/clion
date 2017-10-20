@@ -211,7 +211,9 @@ int strStr(string haystack, string needle) {
     return -1;
 }
 
-// Longest Common Prefix 最长共同前缀
+/* Longest Common Prefix 最长共同前缀.
+ * 注意：区别于dp里"longest common subsequence". Subsequence是离散的, 而prefix是连续的
+ */
 string longestCommonPrefix(vector<string>& strs) {
     if (strs.empty()) return "";
 

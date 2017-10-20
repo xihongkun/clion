@@ -200,6 +200,38 @@ vector<int> clockWiseOrder(vector<vector<int>> &matrix) {
     return result;
 }
 
+/* 数组循环右移k位 (相同的问法： Rotate an array of n elements to the right by k steps)
+ *
+ * 方法一： 开辟一个临时数组B, i->(i+k)%len的映射到B数组，然后再交换回来. 时间复杂度和空间复杂度均为o(n)
+ * 方法二： 每次右移一位. 重复K次. 时间复杂度o(n*k), 空间复杂度o(n)
+ */
+void rotateArray1(int A[], int n, int k) {
+    k = k % n;
+    if (k == 0) return;
+    int B[n];
+    for (int i = 0; i < n; i++) {
+        B[(i + k) % n] = A[i];
+    }
+
+    for (int j = 0; j < n; j++) {
+        A[j] = B[j];
+    }
+}
+
+void rotateArray2(int A[], int n, int k) {
+    k = k % n;
+    if (k == 0) return;
+
+    for (int i = 1; i <= k; i++) {
+        // 每次右移之前，先把最后一位保存起来
+        int temp = A[n - 1];
+        for (int j = n - 2; j >= 0; j--) {
+            A[j + 1] = A[j];
+        }
+        // 保存的值赋给A[0]即可
+        A[0] = temp;
+    }
+}
 
 /*
 int main(){
