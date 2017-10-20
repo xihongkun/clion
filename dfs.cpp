@@ -268,7 +268,7 @@ bool wordSearch(vector<vector<char>> &board, string word) {
     return false;
 }
 
-/* Number of islands
+/* Number of islands. 可以认为边缘的1被0包围
  * 本质是求矩阵中 '1'连续区域的个数
  */
 
@@ -305,7 +305,51 @@ int numIslands(vector<vector<int>> &grid) {
     return count;
 }
 
-/*
+/* LeetCode] Surrounded Regions 包围区域. flipping all 'O's into 'X's in that surrounded region.
+ * 跟之前那道Number of Islands 岛屿的数量很类似，都可以用DFS来解。但不同的是边缘的O不算被包围。
+ * 为了防止边缘的O被转化, 先把和边缘的O联通的O区域设为一个其他字符， 如‘S’. 然后就可以放心的把所有的O变成X了.
+ * 最后再把所有的S变成O.
+ * X X X X
+ * X O O X
+ * X X O X
+ * X O X X
+ */
+void dfsSurroundRegion(vector<vector<char>> &board, int x, int y) {
+    if (x < 0 || x >= board.size() || y < 0 || y >= board[0].size()) return;
+    if (board[x][y] != 'O') return;
+
+    board[x][y] = 'S';
+    dfsSurroundRegion(board, x - 1, y);
+    dfsSurroundRegion(board, x + 1, y);
+    dfsSurroundRegion(board, x, y - 1);
+    dfsSurroundRegion(board, x, y + 1);
+}
+
+void surroundRegion(vector<vector<char>> &board) {
+    if (board.empty()) return;
+    int m = board.size(), n = board[0].size();
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if ((i == 0 || i == m - 1 || j == 0 || j == n - 1) && board[i][j] == 'O') { // 只对边缘的O做dfs
+                dfsSurroundRegion(board, i, j);
+            }
+        }
+    }
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (board[i][j] == 'O') board[i][j] = 'X';
+        }
+    }
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (board[i][j] == 'S') board[i][j] = 'O';
+        }
+    }
+}
+
+
 int main() {
     // Permutations
     vector<int> v = {1,2,3,4};
@@ -400,5 +444,14 @@ int main() {
     int numGrid1 = numIslands(grid1);
     int numGrid2 = numIslands(grid2);
     assert(numGrid1 == 1 && numGrid2 == 3);
+
+    // 包围区域
+    vector<vector<char>> region= {{'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}};
+    surroundRegion(region);
+    cout << endl;
+    for (auto v : region) {
+        for (auto c: v) cout << c << ",";
+        cout << endl;
+    }
+
 }
-*/
