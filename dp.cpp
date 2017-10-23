@@ -41,6 +41,51 @@ int zeroOnePackage(int number, int W, vector<int> &w, vector<int> &v) {
     return f[number][W];
 }
 
+/* Jump Game
+ * Given an array of non-negative integers, you are initially positioned at the first index of the array. Each element in the array represents your maximum jump length at that position.
+ * Determine if you are able to reach the last index. For example: A = [2,3,1,1,4], return true. A = [3,2,1,0,4], return false.
+ * 动规: 设f[i]表示到达A[i]时剩余的最大步数, 则只要f[i] >= 0 就表示f[i]可以到达. 状态转移方程为 f[i] = max(f[i-1], A[i-1]) - 1;
+ * 注意：本题要求只要能到达end即可，也可以超过end
+ */
+bool canJump(int A[], int n) {
+    int f[n];
+    fill_n(&f[0], n, 0);
+    f[0] = 0;
+    for (int i = 1; i < n; i++) {
+        f[i] = max(f[i - 1], A[i - 1]) - 1;
+        if (f[i] < 0) return false;
+    }
+    return f[n - 1] >= 0;
+}
+// 解法二： 贪心. MaxIndex记录能够跳到的最远距离. 则只要MaxIndex >= n -1 即可返回true
+bool canJumpGreedy(int A[], int n) {
+    int maxIndex = A[0]; // 初始化最远能跳到的距离为A[0]
+    for (int i = 0; i <= maxIndex; i++) {
+        if (maxIndex >= n - 1) return true;
+        if (i + A[i] > maxIndex) maxIndex = i + A[i]; // 更新最远能跳到的距离
+    }
+    return false;
+}
+
+/* Jump Game II -- 求最小jump次数
+ * Your goal is to reach the last index in the minimum number of jumps
+ * 动规：设状态f[i]表示到达f[i]的最小jump数. 很明显, f[i]是递增的. 每次循环只要找到第一个j(j<i), 满足j+A[j] >= i, 就表示从j到i只需跳一次就可到达
+ */
+int jump(int A[], int n) {
+    int f[n];
+    fill_n(&f[0], n, INT32_MAX);
+    f[0] = 0;
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (j + A[j] >= i) {  // 可以从j跳到i
+                if (f[i] > f[j] + 1) f[i] = f[j] + 1;
+                break;  // 由于f[i]是递增的，找到第一个满足条件的j即可
+            }
+        }
+    }
+    return f[n-1];
+}
+
 /* 最长上升子序列的长度
  * 例如(1, 7, 3, 5, 9, 4, 8) 有几个上升子序列 如(1, 7), (3, 4, 8)等等。最长上升子序列为(1,3,5,8)
  * 思路： 设f[i]表示以A[i]结尾的最长上升子序列长度，则f[i]的状态转移方程为：

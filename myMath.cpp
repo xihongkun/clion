@@ -83,6 +83,20 @@ int rand_prob(unsigned int N, double prob[]) {
     }
 }
 
+/* X的n次方. 二分法 n/2 n/2 n%2  当n是偶数时， n/2 * n/2, 奇数时, n/2 * n/2 * x1
+ */
+double power(double x, int n) {
+    if (n == 0) return 1.0;
+    double v = power(x, n/2);
+
+    if (n % 2 == 0) return v * v;
+    else return v * v * x;
+}
+
+double pow(double x, int n) {
+    if (n < 0) return 1.0 / power(x, -n);
+    else return power(x, n);
+}
 
 // 反转int
 int reverseInt(int x) {
