@@ -9,6 +9,60 @@
 
 using namespace std;
 
+/* 矩阵染色 用k种颜色
+ */
+bool leftOK(int x, int y, int color, vector<vector<int>> &grid) {
+    if (y == 0) return true;
+    if (grid[x][y - 1] != color) return true;
+    return false;
+}
+
+bool rightOK(int x, int y, int color, vector<vector<int>> &grid) {
+    if (x == grid.size() - 1) return true;
+    if (grid[x][y + 1] != color) return true;
+    return false;
+}
+
+bool upOK(int x, int y, int color, vector<vector<int>> &grid) {
+    if (x == 0) return true;
+    if (grid[x - 1][y] != color) return true;
+    return false;
+}
+
+bool downOK(int x, int y, int color, vector<vector<int>> &grid) {
+    if (x == grid.size() - 1) return true;
+    if (grid[x + 1][y] != color) return true;
+    return false;
+}
+
+bool valid(int x, int y, int color, vector<vector<int>> &grid) {
+    return (leftOK(x, y, color, grid) && rightOK(x, y, color, grid) && upOK(x, y, color, grid) && downOK(x, y, color, grid));
+}
+
+void dfsPainting(vector<vector<int>> &grid, int x, int y, int numOfColors, int &num) {
+    for (int color = 1; color <= numOfColors; color++) {
+        // 每次往下涂. 涂到矩阵下边缘时，开始下一列
+        if (valid(x, y, color, grid)) {
+            grid[x][y] = color;
+            if (x == grid.size() - 1 && y == grid[0].size() - 1) { // 涂完.一种方案
+                num++;
+            }
+
+            else if (x == grid.size() - 1) dfsPainting(grid, 0, y + 1, numOfColors, num); // 右边一列重新开始
+            else dfsPainting(grid, x + 1, y, numOfColors, num);
+            grid[x][y] = 0; // 恢复状态
+        }
+
+    }
+}
+
+int numberOfPainting(int m, int n, int numOfColors) {
+    int num = 0;
+    vector<vector<int>> grid(m, vector<int>(n, 0));
+    dfsPainting(grid, 0, 0, numOfColors, num);
+    return  num;
+}
+
 /* Permutations.
  * Given a collection of numbers, return all possible permutations. You may assume there is no duplicates.
  */
@@ -351,6 +405,10 @@ void surroundRegion(vector<vector<char>> &board) {
 
 
 int main() {
+    // 矩阵染色 2*3的矩阵用3种颜色染色，应该有54种方案
+    int numberPaiting = numberOfPainting(2, 3, 3);
+    assert(numberPaiting == 54);
+
     // Permutations
     vector<int> v = {1,2,3,4};
     vector<vector<int>> p = permute(v);
